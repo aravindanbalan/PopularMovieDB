@@ -89,7 +89,6 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     @Override
     public void onResume() {
         super.onResume();
-        Log.i(LOG_TAG, "***** on resume");
         refreshMovieData();
     }
 
@@ -102,7 +101,6 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Movie movie = mMovieListAdapter.getMovieFromPosition(position);
         if (movie != null) {
-            Log.i(LOG_TAG, "***** onItemClick");
             Intent activityIntent = new Intent(getActivity(), DetailsActivity.class);
             activityIntent.putExtra(MOVIE_PARAMS, movie);
             startActivity(activityIntent);
@@ -160,13 +158,11 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
             try {
                 Uri.Builder builder;
                 if (sortOrder.equalsIgnoreCase(getString(R.string.sort_top_rated))) {
-                    Log.i(LOG_TAG, "****** Movie results uri : " + BASE_URL_TOP_RATED);
                     builder = new Uri.Builder().encodedPath(BASE_URL_TOP_RATED)
                             .appendQueryParameter(PAGE_PARAM, Integer.toString(page))
                             .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIE_DB_API_KEY);
                 } else {
                     //default to popular
-                    Log.i(LOG_TAG, "****** Movie results uri : " + BASE_URL_POPULAR);
                     builder = new Uri.Builder().encodedPath(BASE_URL_POPULAR)
                             .appendQueryParameter(PAGE_PARAM, Integer.toString(page))
                             .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIE_DB_API_KEY);

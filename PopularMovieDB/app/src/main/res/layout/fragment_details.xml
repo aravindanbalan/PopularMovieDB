@@ -5,7 +5,7 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent">
+                  android:layout_height="wrap_content">
 
         <RelativeLayout
                 android:id="@+id/movie_details" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -32,20 +32,17 @@
                 <TextView android:id="@+id/movie_title"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
-                          android:layout_marginBottom="@dimen/margin_small"
-                          android:hint="Inception"/>
+                          android:layout_marginBottom="@dimen/margin_small"/>
 
                 <TextView android:id="@+id/movie_release_date"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
-                          android:layout_marginBottom="@dimen/margin_small"
-                          android:hint="2015"/>
+                          android:layout_marginBottom="@dimen/margin_small"/>
 
                 <TextView android:id="@+id/movie_rating"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
-                          android:layout_marginBottom="@dimen/margin_small"
-                          android:hint="8.1/10"/>
+                          android:layout_marginBottom="@dimen/margin_small"/>
             </LinearLayout>
 
         </RelativeLayout>
