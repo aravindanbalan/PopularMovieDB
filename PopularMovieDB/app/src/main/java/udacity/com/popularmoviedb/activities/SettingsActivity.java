@@ -6,6 +6,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
 
 import udacity.com.popularmoviedb.R;
 
@@ -13,7 +15,7 @@ import udacity.com.popularmoviedb.R;
  * Created by arbalan on 8/13/16.
  */
 
-public class SettingsActivity extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
+public class SettingsActivity extends AppCompatPreferenceActivity implements Preference.OnPreferenceChangeListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,5 +59,17 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(getString(R.string.pref_sorting_key), order.toString());
         editor.commit();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            if (!super.onOptionsItemSelected(item)) {
+                NavUtils.navigateUpFromSameTask(this);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

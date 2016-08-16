@@ -59,8 +59,9 @@ public class MovieListAdapterRecycler extends RecyclerView.Adapter<RecyclerView.
     }
 
     public void appendData(List<Movie> movies) {
+        int size_before = mMovieList.size();
         mMovieList.addAll(movies);
-        notifyDataSetChanged();
+        notifyItemRangeInserted(size_before, movies.size());
     }
 
     public Movie getMovieFromPosition(int position) {
