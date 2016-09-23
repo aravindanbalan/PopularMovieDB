@@ -8,12 +8,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.models.Movie;
+import udacity.com.popularmoviedb.utils.AppHandles;
+import udacity.com.popularmoviedb.utils.ImageLoader;
 
 import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
 import static udacity.com.popularmoviedb.IConstants.MOVIE_PARAMS;
@@ -24,6 +28,7 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_PARAMS;
 
 public class MovieDetailFragment extends Fragment {
     private Movie mMovie;
+    private LinearLayout mMovieDetailLayout;
     private TextView mMovieTitle;
     private TextView mMovieReleaseDate;
     private TextView mMovieOverview;
@@ -33,6 +38,7 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
+        mMovieDetailLayout = (LinearLayout) rootView.findViewById(R.id.movie_detail_layout);
         mMovieTitle = (TextView) rootView.findViewById(R.id.movie_title);
         mMovieReleaseDate = (TextView) rootView.findViewById(R.id.movie_release_date);
         mMovieOverview = (TextView) rootView.findViewById(R.id.movie_detail_overview);
@@ -67,9 +73,19 @@ public class MovieDetailFragment extends Fragment {
             String rating = getResources().getString(R.string.rating_label, Double.toString(mMovie.getVoteAverage()));
             mMovieVoteAverage.setText(rating);
 
-            int width = getContext().getResources().getDisplayMetrics().widthPixels;
-            int height = getContext().getResources().getDisplayMetrics().heightPixels;
-            Picasso.with(getContext()).load(MOVIE_DB_URL_PREFIX + mMovie.getPosterUrl()).centerCrop().resize(width / 2, height / 2).into(mMoviePoster);
+            ImageLoader loader = AppHandles.getImageLoader();
+            loader.loadImage(MOVIE_DB_URL_PREFIX + mMovie.getPosterUrl(), mMoviePoster, new Callback() {
+                @Override
+                public void onSuccess() {
+                    if (mMovieDetailLayout != null) {
+                        mMovieDetailLayout.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onError() {
+                }
+            });
         }
     }
 }

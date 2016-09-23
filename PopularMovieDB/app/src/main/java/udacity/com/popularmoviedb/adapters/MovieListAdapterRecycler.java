@@ -16,6 +16,8 @@ import java.util.List;
 
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.models.Movie;
+import udacity.com.popularmoviedb.utils.AppHandles;
+import udacity.com.popularmoviedb.utils.ImageLoader;
 
 import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
 
@@ -101,7 +103,9 @@ public class MovieListAdapterRecycler extends RecyclerView.Adapter<RecyclerView.
                 Context context = mContextRef.get();
                 int width = context.getResources().getDisplayMetrics().widthPixels;
                 int height = context.getResources().getDisplayMetrics().heightPixels;
-                Picasso.with(context).load(MOVIE_DB_URL_PREFIX + movie.getPosterUrl()).centerCrop().resize(width / 2, height / 2).into(movie_poster);
+
+                ImageLoader loader = AppHandles.getImageLoader();
+                loader.loadImage(MOVIE_DB_URL_PREFIX + movie.getPosterUrl(), movie_poster, width / 2, height / 2);
             }
         }
     }

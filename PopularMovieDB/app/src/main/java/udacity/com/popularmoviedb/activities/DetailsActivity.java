@@ -33,7 +33,7 @@ public class DetailsActivity extends AppCompatActivity {
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     MovieDetailFragment fragment = new MovieDetailFragment();
                     fragment.setArguments(bundle);
-                    ft.add(R.id.detail_container, fragment, "MovieDetailFragment");
+                    ft.add(R.id.movie_detail_container, fragment, "MovieDetailFragment");
                     ft.commit();
                 }
             }

@@ -1,15 +1,15 @@
 package udacity.com.popularmoviedb.fragments;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ListView;
 
 import org.json.JSONException;
 
@@ -31,14 +32,12 @@ import java.util.List;
 
 import udacity.com.popularmoviedb.BuildConfig;
 import udacity.com.popularmoviedb.R;
-import udacity.com.popularmoviedb.activities.DetailsActivity;
 import udacity.com.popularmoviedb.activities.SettingsActivity;
 import udacity.com.popularmoviedb.adapters.MovieListAdapterRecycler;
 import udacity.com.popularmoviedb.models.Movie;
 import udacity.com.popularmoviedb.utils.MovieDataParser;
 import udacity.com.popularmoviedb.utils.ScrollListener;
-
-import static udacity.com.popularmoviedb.IConstants.MOVIE_PARAMS;
+import udacity.com.popularmoviedb.utils.Utility;
 
 /**
  * Created by arbalan on 8/13/16.
@@ -48,6 +47,9 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     private static final String LOG_TAG = HomeFragment.class.getSimpleName();
     private MovieListAdapterRecycler mMovieListAdapter;
     private RecyclerView mRecyclerView;
+    private String mSortOrder;
+    private int mPosition = ListView.INVALID_POSITION;
+    private static final String SELECTED_POSITION = "selected_position";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,7 +63,13 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
 
         mMovieListAdapter = new MovieListAdapterRecycler(getContext(), this);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_list);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        GridLayoutManager gridLayoutManager;
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        } else {
+            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
+        }
+        mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setAdapter(mMovieListAdapter);
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -89,7 +97,13 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     @Override
     public void onResume() {
         super.onResume();
-        refreshMovieData();
+        String sortOrder = Utility.getSortOrder(getContext());
+
+        //avoid extra call to the service on resume if the sort order hasn't changed
+        if (!TextUtils.isEmpty(sortOrder) && !sortOrder.equals(mSortOrder)) {
+            refreshMovieData();
+            mSortOrder = sortOrder;
+        }
     }
 
     @Override
@@ -101,10 +115,9 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Movie movie = mMovieListAdapter.getMovieFromPosition(position);
         if (movie != null) {
-            Intent activityIntent = new Intent(getActivity(), DetailsActivity.class);
-            activityIntent.putExtra(MOVIE_PARAMS, movie);
-            startActivity(activityIntent);
+            ((Callback) getActivity()).onItemSelected(movie);
         }
+        mPosition = position;
     }
 
     private void refreshMovieData() {
@@ -148,16 +161,11 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
             BufferedReader reader = null;
 
             String resultJson;
-
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String sortOrder = sharedPrefs.getString(
-                    getString(R.string.pref_sorting_key),
-                    getString(R.string.pref_sorting_default));
+            String sortOrder = Utility.getSortOrder(getContext());
 
             try {
                 Uri.Builder builder;
-                if (sortOrder.equalsIgnoreCase(getString(R.string.sort_top_rated))) {
+                if (!TextUtils.isEmpty(sortOrder) && sortOrder.equalsIgnoreCase(getString(R.string.sort_top_rated))) {
                     builder = new Uri.Builder().encodedPath(BASE_URL_TOP_RATED)
                             .appendQueryParameter(PAGE_PARAM, Integer.toString(page))
                             .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIE_DB_API_KEY);
@@ -169,6 +177,7 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
                 }
 
                 Uri uri = builder.build();
+                Log.i(LOG_TAG, "********* URL : " + uri.toString());
                 URL url = new URL(uri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -224,5 +233,12 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
             }
             return null;
         }
+    }
+
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Movie movie);
     }
 }

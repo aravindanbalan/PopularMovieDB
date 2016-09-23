@@ -7,6 +7,7 @@ package udacity.com.popularmoviedb;
 public interface IConstants {
     // These are the names of the JSON objects that need to be extracted.
     String MOVIE_RESULTS = "results";
+    String MOVIE_ID = "id";
     String MOVIE_TITLE = "original_title";
     String MOVIE_OVERVIEW = "overview";
     String MOVIE_POSTER_IMAGE = "poster_path";

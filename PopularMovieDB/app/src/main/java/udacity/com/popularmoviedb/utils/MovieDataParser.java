@@ -33,12 +33,14 @@ public class MovieDataParser {
 
                 //Assumption : I assume that all below fields returned by the API are defined as required fields in its design.
                 //As I do not have additional details about the API defining what fields are optional and required.
+                String id = movieJson.getString(MOVIE_ID);
                 String poster_url = movieJson.getString(MOVIE_POSTER_IMAGE);
                 String overview = movieJson.getString(MOVIE_OVERVIEW);
                 double vote_avg = movieJson.getDouble(MOVIE_VOTE_AVERAGE);
                 String title = movieJson.getString(MOVIE_TITLE);
                 String release_date = movieJson.getString(MOVIE_RELEASE_DATE);
 
+                movie.setId(id);
                 movie.setMovieOverview(overview);
                 movie.setPosterUrl(poster_url);
                 movie.setTitle(title);
