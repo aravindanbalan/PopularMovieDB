@@ -22,6 +22,7 @@ public class ImageLoader {
 
     private final Picasso mPicasso;
     private static final String PICASSO_CACHE = "picasso-cache";
+    private static final int MEMORY_CACHE_SIZE = 25;
     private static final int MIN_DISK_CACHE_SIZE = 5 * 1024 * 1024; // 5MB
     private static final int MAX_DISK_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
     protected LruCache mCache;

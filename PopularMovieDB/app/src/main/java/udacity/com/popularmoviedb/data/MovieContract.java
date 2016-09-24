@@ -53,5 +53,10 @@ public class MovieContract {
         public static Uri buildFavoriteUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI_FAVORITE, id);
         }
+
+
+        public static long getIdFromUri(Uri uri) {
+            return ContentUris.parseId(uri);
+        }
     }
 }

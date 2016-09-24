@@ -28,11 +28,11 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_MOVIE_ID + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_MOVIE_POSTER + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_MOVIE_SYNOPSIS + " TEXT NOT NULL, " +
-                MovieEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL," +
-                MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL," +
-                MovieEntry.COLUMN_USER_RATING + " TEXT NOT NULL," +
-                MovieEntry.COLUMN_FAVORITE + " INTEGER NOT NULL DEFAULT 0" +
-                ");";
+                MovieEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
+                MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
+                MovieEntry.COLUMN_USER_RATING + " TEXT NOT NULL, " +
+                MovieEntry.COLUMN_FAVORITE + " INTEGER NOT NULL DEFAULT 0, " +
+                " UNIQUE (" + MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
 
         db.execSQL(SQL_CREATE_MOVIE_TABLE);
     }
