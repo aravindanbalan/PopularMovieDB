@@ -135,8 +135,6 @@ public class MovieDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
             resultJson = buffer.toString();
             Log.i(LOG_TAG, "Movie results output : json : " + resultJson);
 
-            getContext().getContentResolver().delete(MovieEntry.CONTENT_URI_MOVIE, null, null);
-
             try {
                 return MovieDataParser.getMovieDataFromJson(resultJson);
             } catch (JSONException e) {

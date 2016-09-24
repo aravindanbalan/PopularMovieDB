@@ -85,7 +85,7 @@ public class MovieListAdapter extends CursorRecyclerAdapter {
         }
     }
 
-    private void onItemHolderClick(AdapterView.OnItemClickListener onItemClickListener, MovieListAdapter.MovieViewHolder movieViewHolder) {
+    private void onItemHolderClick( AdapterView.OnItemClickListener onItemClickListener, MovieListAdapter.MovieViewHolder movieViewHolder) {
         if (onItemClickListener != null) {
             onItemClickListener.onItemClick(null, movieViewHolder.itemView, movieViewHolder.getAdapterPosition(), movieViewHolder.getItemId());
         }

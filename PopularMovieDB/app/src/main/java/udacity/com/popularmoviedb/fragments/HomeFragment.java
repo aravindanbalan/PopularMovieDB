@@ -20,11 +20,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ListView;
 
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.activities.SettingsActivity;
 import udacity.com.popularmoviedb.adapters.MovieListAdapter;
+import udacity.com.popularmoviedb.adapters.MovieListCursorAdapter;
 import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.data.MovieDataAsyncTask;
 import udacity.com.popularmoviedb.models.Movie;
@@ -39,10 +41,9 @@ import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
 
 public class HomeFragment extends Fragment implements ScrollListener.LoadMoreListener, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = HomeFragment.class.getSimpleName();
-    //    private MovieListAdapterRecycler mMovieListAdapter;
     private static final int MOVIE_LOADER = 0;
-    private MovieListAdapter mMovieListAdapter;
-    private RecyclerView mRecyclerView;
+    private MovieListCursorAdapter mMovieListAdapter;
+    private GridView mGridView;
     private String mSortOrder;
     private int mPosition = ListView.INVALID_POSITION;
     private static final String SELECTED_POSITION = "selected_position";
@@ -57,20 +58,17 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-//        mMovieListAdapter = new MovieListAdapterRecycler(getContext(), this);
-        mMovieListAdapter = new MovieListAdapter(getContext(), null, this);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_list);
-        GridLayoutManager gridLayoutManager;
+        mMovieListAdapter = new MovieListCursorAdapter(getContext(), null, 0);
+        mGridView = (GridView) rootView.findViewById(R.id.movie_list) ;
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+            mGridView.setNumColumns(2);
         } else {
-            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
+            mGridView.setNumColumns(3);
         }
-        mRecyclerView.setLayoutManager(gridLayoutManager);
-        mRecyclerView.setAdapter(mMovieListAdapter);
-        mRecyclerView.setLayoutManager(gridLayoutManager);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addOnScrollListener(new ScrollListener(this));
+
+        mGridView.setAdapter(mMovieListAdapter);
+        mGridView.setOnScrollListener(new ScrollListener(this));
+        mGridView.setOnItemClickListener(this);
 
         return rootView;
     }
@@ -118,8 +116,7 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MovieListAdapter adapter = (MovieListAdapter) parent.getAdapter();
-        Cursor cursor = adapter.getCursor();
+        Cursor cursor = (Cursor) parent.getItemAtPosition(position);
         if (cursor != null && cursor.moveToPosition(position)) {
             // convert cursor into movie object
             final int MOVIE_ID_COL = cursor.getColumnIndex(MovieContract.MovieEntry._ID);
@@ -143,6 +140,7 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
             sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
         }
 
+        //FIXME Need help here, order differs between tablet and mobile
         return new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.CONTENT_URI_MOVIE,
                 new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_POSTER},

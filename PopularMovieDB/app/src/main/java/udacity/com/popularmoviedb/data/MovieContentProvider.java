@@ -51,6 +51,7 @@ public class MovieContentProvider extends ContentProvider {
 
             case MOVIE_WITH_ID:
                 _id = MovieContract.MovieEntry.getIdFromUri(uri);
+                Log.i(LOG_TAG, "**** movie with id : "+ _id);
                 cursor = db.query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
@@ -65,8 +66,8 @@ public class MovieContentProvider extends ContentProvider {
                 cursor = db.query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
-                        MovieContract.MovieEntry.COLUMN_FAVORITE + " = ?",
-                        new String[] { Boolean.toString(true) },
+                        MovieContract.MovieEntry.COLUMN_FAVORITE + " = 1",
+                        null,
                         null,
                         null,
                         sortOrder);
@@ -77,8 +78,8 @@ public class MovieContentProvider extends ContentProvider {
                 cursor = db.query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
-                        MovieContract.MovieEntry._ID + " = ? AND " + MovieContract.MovieEntry.COLUMN_FAVORITE + " = ?",
-                        new String[] { Long.toString(_id), Boolean.toString(true) },
+                        MovieContract.MovieEntry._ID + " = ? AND " + MovieContract.MovieEntry.COLUMN_FAVORITE + " = 1",
+                        new String[] { Long.toString(_id)},
                         null,
                         null,
                         sortOrder);
@@ -128,12 +129,12 @@ public class MovieContentProvider extends ContentProvider {
                 if (insertedId > 0) {
                     insertionUri = MovieContract.MovieEntry.buildMovieUri(insertedId);
                 } else {
-                    throw new SQLException("Failed to insert row into " + uri);
+                    throw new SQLException("********** Failed to insert row into " + uri);
                 }
                 break;
 
             default:
-                throw new UnsupportedOperationException("Unknown uri " + uri);
+                throw new UnsupportedOperationException("********* Unknown uri " + uri);
         }
 
         if (getContext() != null) {
@@ -227,7 +228,7 @@ public class MovieContentProvider extends ContentProvider {
                 db.setTransactionSuccessful();
                 db.endTransaction();
 
-                if (count > 0 && getContext() != null) {
+                if (getContext() != null) {
                     ContentResolver resolver = getContext().getContentResolver();
                     if (resolver != null) {
                         resolver.notifyChange(uri, null);

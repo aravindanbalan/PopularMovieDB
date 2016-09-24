@@ -1,6 +1,7 @@
 package udacity.com.popularmoviedb.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
@@ -26,10 +27,10 @@ public class DetailsActivity extends AppCompatActivity {
 
             Intent intent = getIntent();
             if (intent != null) {
-                Movie movie = intent.getParcelableExtra(MOVIE_PARAMS);
-                if (movie != null) {
+                Uri movieUri = intent.getParcelableExtra(MOVIE_PARAMS);
+                if (movieUri != null) {
                     Bundle bundle = new Bundle();
-                    bundle.putParcelable(MOVIE_PARAMS, movie);
+                    bundle.putParcelable(MOVIE_PARAMS, movieUri);
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     MovieDetailFragment fragment = new MovieDetailFragment();
                     fragment.setArguments(bundle);

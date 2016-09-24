@@ -1,9 +1,13 @@
 package udacity.com.popularmoviedb.fragments;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +16,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import udacity.com.popularmoviedb.R;
-import udacity.com.popularmoviedb.models.Movie;
+import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.utils.AppHandles;
 import udacity.com.popularmoviedb.utils.ImageLoader;
+import udacity.com.popularmoviedb.utils.Utility;
 
 import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
 import static udacity.com.popularmoviedb.IConstants.MOVIE_PARAMS;
@@ -27,7 +31,8 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_PARAMS;
  */
 
 public class MovieDetailFragment extends Fragment {
-    private Movie mMovie;
+    private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
+    private Cursor mMovieCursor;
     private LinearLayout mMovieDetailLayout;
     private TextView mMovieTitle;
     private TextView mMovieReleaseDate;
@@ -52,29 +57,45 @@ public class MovieDetailFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            mMovie = getArguments().getParcelable(MOVIE_PARAMS);
-        }
-        if (mMovie != null && !TextUtils.isEmpty(mMovie.getTitle())) {
-            getActivity().setTitle(mMovie.getTitle());
-        }
-    }
+            Uri movieUri = getArguments().getParcelable(MOVIE_PARAMS);
+            String movieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateMovieDetails();
+            Log.i(LOG_TAG, "******** movie ID : "+ movieId + " Movie uri : " + movieUri);
+            if(movieUri!=null) {
+                mMovieCursor = getActivity().getContentResolver()
+                        .query(movieUri, null, null, null, null);
+                updateMovieDetails();
+            }
+        }
     }
 
     private void updateMovieDetails() {
-        if (mMovie != null) {
-            mMovieTitle.setText(mMovie.getTitle());
-            mMovieReleaseDate.setText(mMovie.getMovieReleaseDate());
-            mMovieOverview.setText(mMovie.getMovieOverview());
-            String rating = getResources().getString(R.string.rating_label, Double.toString(mMovie.getVoteAverage()));
-            mMovieVoteAverage.setText(rating);
+        if (mMovieCursor != null) {
+
+            if (!mMovieCursor.moveToFirst()) {
+                Log.i(LOG_TAG, "***** move to first false");
+                return;
+            }
+
+            String title = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE));
+            String poster = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER));
+            double rating = mMovieCursor.getDouble(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG));
+            String releaseDate = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE));
+            String overview = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_SYNOPSIS));
+            final int is_favorite = mMovieCursor.getInt(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE));
+
+            if (title != null && !TextUtils.isEmpty(title)) {
+                getActivity().setTitle(title);
+            }
+
+            mMovieTitle.setText(title);
+            mMovieReleaseDate.setText(releaseDate);
+            mMovieOverview.setText(overview);
+            String ratingLabel = getResources().getString(R.string.rating_label, Double.toString(rating));
+            mMovieVoteAverage.setText(ratingLabel);
 
             ImageLoader loader = AppHandles.getImageLoader();
-            loader.loadImage(MOVIE_DB_URL_PREFIX + mMovie.getPosterUrl(), mMoviePoster, new Callback() {
+            loader.loadImage(MOVIE_DB_URL_PREFIX + poster, mMoviePoster, new Callback() {
                 @Override
                 public void onSuccess() {
                     if (mMovieDetailLayout != null) {
