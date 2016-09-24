@@ -1,5 +1,8 @@
 package udacity.com.popularmoviedb.fragments;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -29,6 +32,7 @@ import udacity.com.popularmoviedb.adapters.MovieListAdapter;
 import udacity.com.popularmoviedb.adapters.MovieListCursorAdapter;
 import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.services.MovieFetchService;
+import udacity.com.popularmoviedb.sync.MovieSyncAdapter;
 import udacity.com.popularmoviedb.utils.RecyclerViewScrollListener;
 import udacity.com.popularmoviedb.utils.Utility;
 
@@ -66,6 +70,10 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
         mRecyclerView.setAdapter(mMovieListAdapter);
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setHasFixedSize(true);
+
+        //FIXME picasso too slow to load images. Need help in fixing this image stutter on scroll. Temporarily added a cache for recyclerview.
+        mRecyclerView.setItemViewCacheSize(50);
+        mRecyclerView.setDrawingCacheEnabled(true);
         mRecyclerView.addOnScrollListener(new RecyclerViewScrollListener(this));
 
         return rootView;
@@ -107,10 +115,7 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
 
     @Override
     public void getNextPageOnScrolled(int nextPage) {
-//        new MovieDataAsyncTask(nextPage).execute();
-        Intent intent = new Intent(getActivity(), MovieFetchService.class);
-        intent.putExtra(MovieFetchService.PAGE_QUERY_EXTRA, Integer.toString(nextPage));
-        getActivity().startService(intent);
+        MovieSyncAdapter.syncImmediately(getActivity(), Integer.toString(nextPage));
     }
 
     @Override
@@ -127,18 +132,6 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-//        String sortOrderSetting = Utility.getSortOrder(getContext());
-//        String sortOrder;
-//
-//        if (sortOrderSetting.equals(getString(R.string.pref_sorting_default))) {
-//            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
-//        } else {
-//            //sort by rating
-//            sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
-//        }
-
-        //FIXME Need help here, order differs between tablet and mobile
         return new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.CONTENT_URI_MOVIE,
                 new String[] { MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_POSTER },
@@ -158,13 +151,15 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
     }
 
     private void refreshMovieData() {
-
         getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI_MOVIE,null , null);
-//        new MovieDataAsyncTask().execute();
+        MovieSyncAdapter.syncImmediately(getActivity(), Integer.toString(1));
+    }
 
-        Intent intent = new Intent(getActivity(), MovieFetchService.class);
-        intent.putExtra(MovieFetchService.PAGE_QUERY_EXTRA, Integer.toString(1));
-        getActivity().startService(intent);
+    private void setAlarm(Intent intent, long triggerInMilliSeconds){
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0,intent,PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager am=(AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+        //Set the AlarmManager to wake up the system.
+        am.set(AlarmManager.RTC_WAKEUP, triggerInMilliSeconds, pendingIntent);
     }
 
     public interface Callback {

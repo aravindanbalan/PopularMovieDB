@@ -40,7 +40,6 @@ public class MovieDataParser {
                 String overview = movieJson.getString(MOVIE_OVERVIEW);
                 double vote_avg = movieJson.getDouble(MOVIE_VOTE_AVERAGE);
                 double popularity = movieJson.getDouble(MOVIE_POPULARITY);
-                Log.i("MovieDataParser", "*********** popu : " + popularity);
                 String title = movieJson.getString(MOVIE_TITLE);
                 String release_date = movieJson.getString(MOVIE_RELEASE_DATE);
 

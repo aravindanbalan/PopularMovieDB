@@ -9,4 +9,7 @@
 
     <string name="sort_popular" translatable="false">popular</string>
     <string name="sort_top_rated" translatable="false">toprated</string>
+
+    <string name="sync_account_type">com.udacity.popularmoviedb</string>
+    <string name="content_authority">udacity.com.popularmoviedb.app</string>
 </resources>

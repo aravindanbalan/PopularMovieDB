@@ -1,11 +1,15 @@
-package udacity.com.popularmoviedb.services;
+package udacity.com.popularmoviedb.sync;
 
-import android.app.IntentService;
-import android.content.BroadcastReceiver;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
+import android.content.SyncResult;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -27,31 +31,74 @@ import udacity.com.popularmoviedb.models.Movie;
 import udacity.com.popularmoviedb.utils.MovieDataParser;
 import udacity.com.popularmoviedb.utils.Utility;
 
-import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
+import static udacity.com.popularmoviedb.IConstants.*;
 
 /**
  * Created by arbalan on 9/24/16.
  */
 
-@Deprecated
-public class MovieFetchService extends IntentService {
-    private final String BASE_URL_POPULAR = "http://api.themoviedb.org/3/movie/popular";
-    private final String BASE_URL_TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated";
-    private final String PAGE_PARAM = "page";
-    private final String API_KEY_PARAM = "api_key";
-    public static final String PAGE_QUERY_EXTRA = "page";
-    private final String LOG_TAG = MovieFetchService.class.getSimpleName();
+public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
+    public final String LOG_TAG = MovieSyncAdapter.class.getSimpleName();
 
-    public MovieFetchService() {
-        super("MovieFetchService");
+    public MovieSyncAdapter(Context context, boolean autoInitialize) {
+        super(context, autoInitialize);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        String page = intent.getStringExtra(PAGE_QUERY_EXTRA);
+    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        String page = extras.getString(PAGE_QUERY_EXTRA);
+        Log.i(LOG_TAG, "**** starting to sync" + page);
         List<Movie> movies = getJsonDataFromWeatherApI(page);
         bulkInsertToDB(movies);
     }
+
+    public static void syncImmediately(Context context, String page) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        bundle.putString(PAGE_QUERY_EXTRA, page);
+        ContentResolver.requestSync(getSyncAccount(context),
+                context.getString(R.string.content_authority), bundle);
+    }
+
+    /**
+     * Helper method to get the fake account to be used with SyncAdapter, or make a new one
+     * if the fake account doesn't exist yet.  If we make a new account, we call the
+     * onAccountCreated method so we can initialize things.
+     *
+     * @param context The context used to access the account service
+     * @return a fake account.
+     */
+    public static Account getSyncAccount(Context context) {
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+
+        // Create the account type and default account
+        Account newAccount = new Account(
+                context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
+
+        // If the password doesn't exist, the account doesn't exist
+        if (null == accountManager.getPassword(newAccount)) {
+
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+            if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
+                return null;
+            }
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call ContentResolver.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+
+        }
+        return newAccount;
+    }
+
 
     private List<Movie> getJsonDataFromWeatherApI(String page) {
         HttpURLConnection urlConnection = null;
@@ -159,15 +206,6 @@ public class MovieFetchService extends IntentService {
             }
 
             Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted");
-        }
-    }
-
-    public static class AlarmReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Intent sendIntent = new Intent(context, MovieFetchService.class);
-            sendIntent.putExtra(PAGE_QUERY_EXTRA, intent.getStringArrayExtra(PAGE_QUERY_EXTRA));
-            context.startService(sendIntent);
         }
     }
 }

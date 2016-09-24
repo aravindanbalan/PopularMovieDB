@@ -17,4 +17,9 @@ public interface IConstants {
     String MOVIE_DB_URL_PREFIX = "http://image.tmdb.org/t/p/w185";
     String MOVIE_PARAMS = "movie_params";
     String YOUTUBE_TRAILER_URL = "https://www.youtube.com/watch?v=";
+    String BASE_URL_POPULAR = "http://api.themoviedb.org/3/movie/popular";
+    String BASE_URL_TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated";
+    String PAGE_PARAM = "page";
+    String API_KEY_PARAM = "api_key";
+    String PAGE_QUERY_EXTRA = "page";
 }
