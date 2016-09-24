@@ -12,7 +12,7 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
     private static final double NUMBER_OF_PAGES = 1.5;
     private static final int DEFAULT_LIMIT = 30;
     private int mCurrentPage;
-    private static final int mLastPage = 1000; //API supports from 1 to 1000
+    private static final int mLastPage = 10; //API supports from 1 to 1000, but here we restrict to 10 pages
 
     private LoadMoreListener mLoadMoreListener;
 

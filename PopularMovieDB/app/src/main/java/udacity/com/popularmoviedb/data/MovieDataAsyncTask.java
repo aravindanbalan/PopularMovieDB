@@ -30,6 +30,7 @@ import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
  * Created by arbalan on 9/23/16.
  */
 
+@Deprecated
 public class MovieDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
     private final String LOG_TAG = MovieDataAsyncTask.class.getSimpleName();
     private final String BASE_URL_POPULAR = "http://api.themoviedb.org/3/movie/popular";

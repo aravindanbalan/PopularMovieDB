@@ -159,8 +159,7 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
 
     private void refreshMovieData() {
 
-        //TODO delete the existing data in DB as we are doing a fresh call
-
+        getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI_MOVIE,null , null);
 //        new MovieDataAsyncTask().execute();
 
         Intent intent = new Intent(getActivity(), MovieFetchService.class);

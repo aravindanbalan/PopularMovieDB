@@ -25,6 +25,7 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
  * Created by arbalan on 8/14/16.
  */
 
+@Deprecated
 public class MovieListAdapterRecycler extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String LOG_TAG = MovieListAdapterRecycler.class.getSimpleName();
     private WeakReference<Context> mContextRef;

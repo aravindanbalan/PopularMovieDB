@@ -10,6 +10,7 @@ import android.widget.GridView;
  * Created by arbalan on 8/14/16.
  */
 
+@Deprecated
 public class GridViewScrollListener implements GridView.OnScrollListener {
     private boolean mLoading;
     private static final double NUMBER_OF_PAGES = 1.5;

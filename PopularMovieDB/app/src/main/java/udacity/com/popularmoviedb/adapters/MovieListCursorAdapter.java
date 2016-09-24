@@ -23,6 +23,7 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
  * Created by arbalan on 9/24/16.
  */
 
+@Deprecated
 public class MovieListCursorAdapter extends CursorAdapter {
 
     public static final String LOG_TAG = MovieListCursorAdapter.class.getSimpleName();
