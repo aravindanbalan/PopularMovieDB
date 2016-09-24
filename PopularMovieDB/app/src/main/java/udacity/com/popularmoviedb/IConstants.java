@@ -13,6 +13,7 @@ public interface IConstants {
     String MOVIE_POSTER_IMAGE = "poster_path";
     String MOVIE_VOTE_AVERAGE = "vote_average";
     String MOVIE_RELEASE_DATE = "release_date";
+    String MOVIE_POPULARITY = "popularity";
     String MOVIE_DB_URL_PREFIX = "http://image.tmdb.org/t/p/w185";
     String MOVIE_PARAMS = "movie_params";
     String YOUTUBE_TRAILER_URL = "https://www.youtube.com/watch?v=";

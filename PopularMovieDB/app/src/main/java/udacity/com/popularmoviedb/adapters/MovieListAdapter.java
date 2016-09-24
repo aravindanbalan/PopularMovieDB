@@ -2,7 +2,6 @@ package udacity.com.popularmoviedb.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-
-import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
 
@@ -78,9 +75,13 @@ public class MovieListAdapter extends CursorRecyclerAdapter {
             String moviePoster = cursor.getString(moviePosterColumn);
 
             Log.i(LOG_TAG + " ***** Image uri:", MOVIE_DB_URL_PREFIX + moviePoster);
+            Context context = mContextRef.get();
+
+            int width = context.getResources().getDisplayMetrics().widthPixels;
+            int height = context.getResources().getDisplayMetrics().heightPixels;
 
             ImageLoader loader = AppHandles.getImageLoader();
-            loader.loadImage(MOVIE_DB_URL_PREFIX + moviePoster, posterImageView);
+            loader.loadImage(MOVIE_DB_URL_PREFIX + moviePoster, posterImageView, width / 2, height / 2);
         }
     }
 

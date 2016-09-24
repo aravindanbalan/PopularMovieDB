@@ -58,6 +58,7 @@ public class MovieDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
                     movieValues.put(MovieEntry.COLUMN_MOVIE_POSTER, movie.getPosterUrl());
                     movieValues.put(MovieEntry.COLUMN_MOVIE_SYNOPSIS, movie.getMovieOverview());
                     movieValues.put(MovieEntry.COLUMN_MOVIE_VOTE_AVG, movie.getVoteAverage());
+                    movieValues.put(MovieEntry.COLUMN_POPULARITY, movie.getPopularity());
                     movieValues.put(MovieEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
                     movieValues.put(MovieEntry.COLUMN_RELEASE_DATE, movie.getMovieReleaseDate());
 
@@ -133,6 +134,8 @@ public class MovieDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
             }
             resultJson = buffer.toString();
             Log.i(LOG_TAG, "Movie results output : json : " + resultJson);
+
+            getContext().getContentResolver().delete(MovieEntry.CONTENT_URI_MOVIE, null, null);
 
             try {
                 return MovieDataParser.getMovieDataFromJson(resultJson);

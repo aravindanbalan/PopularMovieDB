@@ -1,5 +1,7 @@
 package udacity.com.popularmoviedb.utils;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +39,8 @@ public class MovieDataParser {
                 String poster_url = movieJson.getString(MOVIE_POSTER_IMAGE);
                 String overview = movieJson.getString(MOVIE_OVERVIEW);
                 double vote_avg = movieJson.getDouble(MOVIE_VOTE_AVERAGE);
+                double popularity = movieJson.getDouble(MOVIE_POPULARITY);
+                Log.i("MovieDataParser", "*********** popu : " + popularity);
                 String title = movieJson.getString(MOVIE_TITLE);
                 String release_date = movieJson.getString(MOVIE_RELEASE_DATE);
 
@@ -45,6 +49,7 @@ public class MovieDataParser {
                 movie.setPosterUrl(poster_url);
                 movie.setTitle(title);
                 movie.setVoteAverage(vote_avg);
+                movie.setVoteAverage(popularity);
                 movie.setMovieReleaseDate(release_date);
                 movieList.add(movie);
             }

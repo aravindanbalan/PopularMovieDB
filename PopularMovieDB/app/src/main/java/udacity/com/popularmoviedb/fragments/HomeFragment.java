@@ -106,6 +106,8 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
         if (!TextUtils.isEmpty(sortOrder) && !sortOrder.equals(mSortOrder)) {
             refreshMovieData();
             mSortOrder = sortOrder;
+            getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+
         }
     }
 
@@ -134,22 +136,19 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
         String sortOrderSetting = Utility.getSortOrder(getContext());
         String sortOrder;
 
-        //TODO
-//        if (sortOrderSetting.equals(getString(R.string.pref_sorting_default))) {
-//            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
-//        } else {
-//            //sort by rating
-//            sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
-//        }
-
-        sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
+        if (sortOrderSetting.equals(getString(R.string.pref_sorting_default))) {
+            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
+        } else {
+            //sort by rating
+            sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
+        }
 
         return new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.CONTENT_URI_MOVIE,
                 new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_POSTER},
                 null,
                 null,
-                sortOrder);
+                null);
     }
 
     @Override
