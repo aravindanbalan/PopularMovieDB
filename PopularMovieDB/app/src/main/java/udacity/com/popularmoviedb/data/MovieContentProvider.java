@@ -202,6 +202,43 @@ public class MovieContentProvider extends ContentProvider {
         return rowsUpdated;
     }
 
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        SQLiteDatabase db = mMovieDBHelper.getWritableDatabase();
+        int matcher = sUriMatcher.match(uri);
+
+        if(values == null || values.length == 0){
+            return 0;
+        }
+
+        switch (matcher) {
+            case MOVIE: {
+                db.beginTransaction();
+                int count = 0;
+
+                for (ContentValues item : values) {
+                    long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, item);
+                    if (_id != -1) {
+                        count++;
+                    }
+                }
+                db.setTransactionSuccessful();
+                db.endTransaction();
+
+                if (count > 0 && getContext() != null) {
+                    ContentResolver resolver = getContext().getContentResolver();
+                    if (resolver != null) {
+                        resolver.notifyChange(uri, null);
+                    }
+                }
+                return count;
+            }
+
+            default:
+                return super.bulkInsert(uri, values);
+        }
+    }
+
     static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
