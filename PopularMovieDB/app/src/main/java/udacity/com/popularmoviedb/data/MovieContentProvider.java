@@ -90,6 +90,7 @@ public class MovieContentProvider extends ContentProvider {
 
         }
 
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
 
@@ -248,9 +249,9 @@ public class MovieContentProvider extends ContentProvider {
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
         uriMatcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
-        uriMatcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", MOVIE_WITH_ID);
+        uriMatcher.addURI(authority, MovieContract.PATH_MOVIE + "/#", MOVIE_WITH_ID);
         uriMatcher.addURI(authority, MovieContract.PATH_FAVORITE, FAVORITE);
-        uriMatcher.addURI(authority, MovieContract.PATH_FAVORITE + "/*", FAVORITE_WITH_ID);
+        uriMatcher.addURI(authority, MovieContract.PATH_FAVORITE + "/#", FAVORITE_WITH_ID);
         return uriMatcher;
     }
 }
