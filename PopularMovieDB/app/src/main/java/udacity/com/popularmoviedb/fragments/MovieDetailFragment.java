@@ -5,6 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,15 +33,15 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_PARAMS;
  * Created by arbalan on 8/14/16.
  */
 
-public class MovieDetailFragment extends Fragment {
+public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
-    private Cursor mMovieCursor;
     private LinearLayout mMovieDetailLayout;
     private TextView mMovieTitle;
     private TextView mMovieReleaseDate;
     private TextView mMovieOverview;
     private TextView mMovieVoteAverage;
     private ImageView mMoviePoster;
+    private static final int DETAILS_LOADER = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -54,35 +57,38 @@ public class MovieDetailFragment extends Fragment {
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        getLoaderManager().initLoader(DETAILS_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
-
-        if (getArguments() != null) {
-            Uri movieUri = getArguments().getParcelable(MOVIE_PARAMS);
-            String movieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
-
-            Log.i(LOG_TAG, "******** movie ID : "+ movieId + " Movie uri : " + movieUri);
-            if(movieUri!=null) {
-                mMovieCursor = getActivity().getContentResolver()
-                        .query(movieUri, null, null, null, null);
-                updateMovieDetails();
-            }
-        }
     }
 
-    private void updateMovieDetails() {
-        if (mMovieCursor != null) {
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri movieUri = getArguments().getParcelable(MOVIE_PARAMS);
+        String movieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
 
-            if (!mMovieCursor.moveToFirst()) {
-                Log.i(LOG_TAG, "***** move to first false");
+        return new CursorLoader(
+                getActivity(),
+                movieUri,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
+        if (data != null) {
+            if (!data.moveToFirst()) {
                 return;
             }
 
-            String title = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE));
-            String poster = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER));
-            double rating = mMovieCursor.getDouble(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG));
-            String releaseDate = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE));
-            String overview = mMovieCursor.getString(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_SYNOPSIS));
-            final int is_favorite = mMovieCursor.getInt(mMovieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE));
+            String title = data.getString(data.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE));
+            String poster = data.getString(data.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER));
+            double rating = data.getDouble(data.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG));
+            String releaseDate = data.getString(data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE));
+            String overview = data.getString(data.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_SYNOPSIS));
+            final int is_favorite = data.getInt(data.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE));
 
             if (title != null && !TextUtils.isEmpty(title)) {
                 getActivity().setTitle(title);
@@ -108,5 +114,9 @@ public class MovieDetailFragment extends Fragment {
                 }
             });
         }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 }

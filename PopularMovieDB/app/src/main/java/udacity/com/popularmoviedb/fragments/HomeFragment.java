@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+
         mMovieListAdapter = new MovieListCursorAdapter(getContext(), null, 0);
         mGridView = (GridView) rootView.findViewById(R.id.movie_list) ;
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
