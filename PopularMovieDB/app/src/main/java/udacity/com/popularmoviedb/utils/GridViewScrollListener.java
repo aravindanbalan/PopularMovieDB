@@ -10,7 +10,7 @@ import android.widget.GridView;
  * Created by arbalan on 8/14/16.
  */
 
-public class ScrollListener implements GridView.OnScrollListener {
+public class GridViewScrollListener implements GridView.OnScrollListener {
     private boolean mLoading;
     private static final double NUMBER_OF_PAGES = 1.5;
     private static final int DEFAULT_LIMIT = 30;
@@ -22,7 +22,7 @@ public class ScrollListener implements GridView.OnScrollListener {
 
     private LoadMoreListener mLoadMoreListener;
 
-    public ScrollListener(LoadMoreListener loadMoreListener) {
+    public GridViewScrollListener(LoadMoreListener loadMoreListener) {
         mCurrentPage = 1;
         mLoadMoreListener = loadMoreListener;
         mThreshold = DEFAULT_LIMIT * NUMBER_OF_PAGES;

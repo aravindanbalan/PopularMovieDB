@@ -3,16 +3,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:id="@+id/movie_list"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"/>-->
-
-    <GridView
+    <android.support.v7.widget.RecyclerView
             android:id="@+id/movie_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:horizontalSpacing="0dp"
-            android:numColumns="2"
-            android:verticalSpacing="0dp"/>
+            android:layout_height="match_parent"/>
 </RelativeLayout>

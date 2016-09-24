@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
@@ -27,12 +26,12 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
 public class MovieListAdapter extends CursorRecyclerAdapter {
     private static final String LOG_TAG = MovieListAdapter.class.getSimpleName();
     private WeakReference<Context> mContextRef;
-    private AdapterView.OnItemClickListener mOnItemClickListener;
+    private MovieOnItemClickListener mMovieOnItemClickListener;
 
-    public MovieListAdapter(Context context, Cursor c, AdapterView.OnItemClickListener itemClickListener) {
+    public MovieListAdapter(Context context, Cursor c, MovieOnItemClickListener itemClickListener) {
         super(c);
         mContextRef = new WeakReference<>(context);
-        mOnItemClickListener = itemClickListener;
+        mMovieOnItemClickListener = itemClickListener;
     }
 
     @Override
@@ -44,28 +43,28 @@ public class MovieListAdapter extends CursorRecyclerAdapter {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View rootView = inflater.inflate(R.layout.movie_layout, parent, false);
-        return new MovieListAdapter.MovieViewHolder(mContextRef.get(), rootView, this, mOnItemClickListener);
+        return new MovieListAdapter.MovieViewHolder(mContextRef.get(), rootView, this, mMovieOnItemClickListener);
     }
 
     private static class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private MovieListAdapter mAdapter;
-        private AdapterView.OnItemClickListener mOnItemClickListener;
+        private MovieOnItemClickListener mOnItemClickListener;
         private WeakReference<Context> mContextRef;
         private View rootView;
 
-        MovieViewHolder(Context context, View containerView, MovieListAdapter adapter, AdapterView.OnItemClickListener onItemClickListener) {
+        MovieViewHolder(Context context, View containerView, MovieListAdapter adapter, MovieOnItemClickListener itemClickListener) {
             super(containerView);
             rootView = containerView;
             itemView.setOnClickListener(this);
             mAdapter = adapter;
-            mOnItemClickListener = onItemClickListener;
+            mOnItemClickListener = itemClickListener;
             mContextRef = new WeakReference<>(context);
         }
 
         @Override
         public void onClick(View view) {
-            mAdapter.onItemHolderClick(mOnItemClickListener, this);
+            mAdapter.onItemHolderClick(mOnItemClickListener, this, mAdapter.getCursor());
         }
 
         private void bindMovieObject(Cursor cursor) {
@@ -85,9 +84,13 @@ public class MovieListAdapter extends CursorRecyclerAdapter {
         }
     }
 
-    private void onItemHolderClick( AdapterView.OnItemClickListener onItemClickListener, MovieListAdapter.MovieViewHolder movieViewHolder) {
-        if (onItemClickListener != null) {
-            onItemClickListener.onItemClick(null, movieViewHolder.itemView, movieViewHolder.getAdapterPosition(), movieViewHolder.getItemId());
+    private void onItemHolderClick(MovieOnItemClickListener itemClickListener, MovieListAdapter.MovieViewHolder movieViewHolder, Cursor cursor) {
+        if (itemClickListener != null) {
+            itemClickListener.onItemClick(cursor, movieViewHolder.getAdapterPosition());
         }
+    }
+
+    public interface MovieOnItemClickListener {
+        void onItemClick(Cursor cursor, int position);
     }
 }

@@ -39,6 +39,8 @@
                     android:value=".activities.HomeActivity"/>
         </activity>
 
+        <service android:name=".services.MovieFetchService"/>
+
         <provider
                 android:authorities="udacity.com.popularmoviedb.app"
                 android:name=".data.MovieContentProvider"/>

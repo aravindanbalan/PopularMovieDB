@@ -63,6 +63,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        if(getArguments() == null) return null;
+
         Uri movieUri = getArguments().getParcelable(MOVIE_PARAMS);
         String movieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
 

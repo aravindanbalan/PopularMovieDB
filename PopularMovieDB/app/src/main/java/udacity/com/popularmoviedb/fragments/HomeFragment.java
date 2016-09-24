@@ -28,22 +28,19 @@ import udacity.com.popularmoviedb.activities.SettingsActivity;
 import udacity.com.popularmoviedb.adapters.MovieListAdapter;
 import udacity.com.popularmoviedb.adapters.MovieListCursorAdapter;
 import udacity.com.popularmoviedb.data.MovieContract;
-import udacity.com.popularmoviedb.data.MovieDataAsyncTask;
-import udacity.com.popularmoviedb.models.Movie;
-import udacity.com.popularmoviedb.utils.ScrollListener;
+import udacity.com.popularmoviedb.services.MovieFetchService;
+import udacity.com.popularmoviedb.utils.RecyclerViewScrollListener;
 import udacity.com.popularmoviedb.utils.Utility;
-
-import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
 
 /**
  * Created by arbalan on 8/13/16.
  */
 
-public class HomeFragment extends Fragment implements ScrollListener.LoadMoreListener, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnItemClickListener, RecyclerViewScrollListener.LoadMoreListener, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = HomeFragment.class.getSimpleName();
     private static final int MOVIE_LOADER = 0;
-    private MovieListCursorAdapter mMovieListAdapter;
-    private GridView mGridView;
+    private MovieListAdapter mMovieListAdapter;
+    private RecyclerView mRecyclerView;
     private String mSortOrder;
     private int mPosition = ListView.INVALID_POSITION;
     private static final String SELECTED_POSITION = "selected_position";
@@ -57,19 +54,19 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-
-        mMovieListAdapter = new MovieListCursorAdapter(getContext(), null, 0);
-        mGridView = (GridView) rootView.findViewById(R.id.movie_list) ;
+        mMovieListAdapter = new MovieListAdapter(getContext(), null, this);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_list);
+        GridLayoutManager gridLayoutManager;
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mGridView.setNumColumns(2);
+            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
         } else {
-            mGridView.setNumColumns(3);
+            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         }
-
-        mGridView.setAdapter(mMovieListAdapter);
-        mGridView.setOnScrollListener(new ScrollListener(this));
-        mGridView.setOnItemClickListener(this);
+        mRecyclerView.setLayoutManager(gridLayoutManager);
+        mRecyclerView.setAdapter(mMovieListAdapter);
+        mRecyclerView.setLayoutManager(gridLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addOnScrollListener(new RecyclerViewScrollListener(this));
 
         return rootView;
     }
@@ -105,19 +102,19 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
         if (!TextUtils.isEmpty(sortOrder) && !sortOrder.equals(mSortOrder)) {
             refreshMovieData();
             mSortOrder = sortOrder;
-            getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
-
         }
     }
 
     @Override
     public void getNextPageOnScrolled(int nextPage) {
-        new MovieDataAsyncTask(nextPage).execute();
+//        new MovieDataAsyncTask(nextPage).execute();
+        Intent intent = new Intent(getActivity(), MovieFetchService.class);
+        intent.putExtra(MovieFetchService.PAGE_QUERY_EXTRA, Integer.toString(nextPage));
+        getActivity().startService(intent);
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+    public void onItemClick(Cursor cursor, int position) {
         if (cursor != null && cursor.moveToPosition(position)) {
             // convert cursor into movie object
             final int MOVIE_ID_COL = cursor.getColumnIndex(MovieContract.MovieEntry._ID);
@@ -131,20 +128,20 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        String sortOrderSetting = Utility.getSortOrder(getContext());
-        String sortOrder;
-
-        if (sortOrderSetting.equals(getString(R.string.pref_sorting_default))) {
-            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
-        } else {
-            //sort by rating
-            sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
-        }
+//        String sortOrderSetting = Utility.getSortOrder(getContext());
+//        String sortOrder;
+//
+//        if (sortOrderSetting.equals(getString(R.string.pref_sorting_default))) {
+//            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
+//        } else {
+//            //sort by rating
+//            sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
+//        }
 
         //FIXME Need help here, order differs between tablet and mobile
         return new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.CONTENT_URI_MOVIE,
-                new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_POSTER},
+                new String[] { MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_POSTER },
                 null,
                 null,
                 null);
@@ -161,13 +158,20 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     }
 
     private void refreshMovieData() {
-        new MovieDataAsyncTask().execute();
+
+        //TODO delete the existing data in DB as we are doing a fresh call
+
+//        new MovieDataAsyncTask().execute();
+
+        Intent intent = new Intent(getActivity(), MovieFetchService.class);
+        intent.putExtra(MovieFetchService.PAGE_QUERY_EXTRA, Integer.toString(1));
+        getActivity().startService(intent);
     }
 
     public interface Callback {
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri movieUri);
+        void onItemSelected(Uri movieUri);
     }
 }
