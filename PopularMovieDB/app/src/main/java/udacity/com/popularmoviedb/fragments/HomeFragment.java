@@ -2,15 +2,17 @@ package udacity.com.popularmoviedb.fragments;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,33 +22,26 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import org.json.JSONException;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-
-import udacity.com.popularmoviedb.BuildConfig;
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.activities.SettingsActivity;
-import udacity.com.popularmoviedb.adapters.MovieListAdapterRecycler;
+import udacity.com.popularmoviedb.adapters.MovieListAdapter;
+import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.data.MovieDataAsyncTask;
 import udacity.com.popularmoviedb.models.Movie;
-import udacity.com.popularmoviedb.utils.MovieDataParser;
 import udacity.com.popularmoviedb.utils.ScrollListener;
 import udacity.com.popularmoviedb.utils.Utility;
+
+import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
 
 /**
  * Created by arbalan on 8/13/16.
  */
 
-public class HomeFragment extends Fragment implements ScrollListener.LoadMoreListener, AdapterView.OnItemClickListener {
+public class HomeFragment extends Fragment implements ScrollListener.LoadMoreListener, AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = HomeFragment.class.getSimpleName();
-    private MovieListAdapterRecycler mMovieListAdapter;
+    //    private MovieListAdapterRecycler mMovieListAdapter;
+    private static final int MOVIE_LOADER = 0;
+    private MovieListAdapter mMovieListAdapter;
     private RecyclerView mRecyclerView;
     private String mSortOrder;
     private int mPosition = ListView.INVALID_POSITION;
@@ -62,7 +57,8 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mMovieListAdapter = new MovieListAdapterRecycler(getContext(), this);
+//        mMovieListAdapter = new MovieListAdapterRecycler(getContext(), this);
+        mMovieListAdapter = new MovieListAdapter(getContext(), null, this);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_list);
         GridLayoutManager gridLayoutManager;
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -77,6 +73,12 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
         mRecyclerView.addOnScrollListener(new ScrollListener(this));
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -114,11 +116,50 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Movie movie = mMovieListAdapter.getMovieFromPosition(position);
-        if (movie != null) {
-            ((Callback) getActivity()).onItemSelected(movie);
+        MovieListAdapter adapter = (MovieListAdapter) parent.getAdapter();
+        Cursor cursor = adapter.getCursor();
+        if (cursor != null && cursor.moveToPosition(position)) {
+            // convert cursor into movie object
+            final int MOVIE_ID_COL = cursor.getColumnIndex(MovieContract.MovieEntry._ID);
+            Uri movieUri = MovieContract.MovieEntry.buildMovieUri(cursor.getInt(MOVIE_ID_COL));
+            ((Callback) getActivity()).onItemSelected(movieUri);
         }
+
         mPosition = position;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        String sortOrderSetting = Utility.getSortOrder(getContext());
+        String sortOrder;
+
+        //TODO
+//        if (sortOrderSetting.equals(getString(R.string.pref_sorting_default))) {
+//            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
+//        } else {
+//            //sort by rating
+//            sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
+//        }
+
+        sortOrder = MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG + " DESC";
+
+        return new CursorLoader(getActivity(),
+                MovieContract.MovieEntry.CONTENT_URI_MOVIE,
+                new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_POSTER},
+                null,
+                null,
+                sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mMovieListAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMovieListAdapter.swapCursor(null);
     }
 
     private void refreshMovieData() {
@@ -129,6 +170,6 @@ public class HomeFragment extends Fragment implements ScrollListener.LoadMoreLis
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        public void onItemSelected(Movie movie);
+        public void onItemSelected(Uri movieUri);
     }
 }

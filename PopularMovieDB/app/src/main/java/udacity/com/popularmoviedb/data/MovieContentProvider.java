@@ -8,12 +8,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Created by arbalan on 9/23/16.
  */
 
 public class MovieContentProvider extends ContentProvider {
+    private final String LOG_TAG = MovieContentProvider.class.getSimpleName();
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     static final int MOVIE = 100;
@@ -231,6 +233,7 @@ public class MovieContentProvider extends ContentProvider {
                         resolver.notifyChange(uri, null);
                     }
                 }
+                Log.i(LOG_TAG, "*********** bulk inserted : "+ count);
                 return count;
             }
 

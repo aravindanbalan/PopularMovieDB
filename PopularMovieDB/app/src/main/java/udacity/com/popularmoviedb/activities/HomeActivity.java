@@ -1,6 +1,7 @@
 package udacity.com.popularmoviedb.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -33,10 +34,10 @@ public class HomeActivity extends AppCompatActivity implements HomeFragment.Call
     }
 
     @Override
-    public void onItemSelected(Movie movie) {
+    public void onItemSelected(Uri uri) {
         if (mIsTablet) {
             Bundle args = new Bundle();
-            args.putParcelable(MOVIE_PARAMS, movie);
+            args.putParcelable(MOVIE_PARAMS, uri);
 
             MovieDetailFragment fragment = new MovieDetailFragment();
             fragment.setArguments(args);
@@ -46,7 +47,7 @@ public class HomeActivity extends AppCompatActivity implements HomeFragment.Call
                     .commit();
         } else {
             Intent activityIntent = new Intent(this, DetailsActivity.class);
-            activityIntent.putExtra(MOVIE_PARAMS, movie);
+            activityIntent.putExtra(MOVIE_PARAMS, uri);
             startActivity(activityIntent);
         }
     }

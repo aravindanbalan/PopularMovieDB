@@ -2,17 +2,20 @@ package udacity.com.popularmoviedb.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
-import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.lang.ref.WeakReference;
+
+import udacity.com.popularmoviedb.CursorRecyclerAdapter;
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.utils.AppHandles;
@@ -24,35 +27,66 @@ import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX;
  * Created by arbalan on 9/23/16.
  */
 
-public class MovieListAdapter extends CursorAdapter {
+public class MovieListAdapter extends CursorRecyclerAdapter {
     private static final String LOG_TAG = MovieListAdapter.class.getSimpleName();
+    private WeakReference<Context> mContextRef;
+    private AdapterView.OnItemClickListener mOnItemClickListener;
 
-    public MovieListAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    public MovieListAdapter(Context context, Cursor c, AdapterView.OnItemClickListener itemClickListener) {
+        super(c);
+        mContextRef = new WeakReference<>(context);
+        mOnItemClickListener = itemClickListener;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.movie_layout, parent, false);
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, Cursor cursor) {
+        ((MovieListAdapter.MovieViewHolder) holder).bindMovieObject(cursor);
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        ImageView posterImageView = (ImageView) view.findViewById(R.id.movie_poster);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View rootView = inflater.inflate(R.layout.movie_layout, parent, false);
+        return new MovieListAdapter.MovieViewHolder(mContextRef.get(), rootView, this, mOnItemClickListener);
+    }
 
-        int moviePosterColumn = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER);
-        String moviePoster = cursor.getString(moviePosterColumn);
+    private static class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        Uri imageUri = Uri.parse(MOVIE_DB_URL_PREFIX).buildUpon()
-                .appendPath(moviePoster)
-                .build();
+        private MovieListAdapter mAdapter;
+        private AdapterView.OnItemClickListener mOnItemClickListener;
+        private WeakReference<Context> mContextRef;
+        private View rootView;
 
-        Log.d(LOG_TAG + " - Image uri:", imageUri.toString());
+        MovieViewHolder(Context context, View containerView, MovieListAdapter adapter, AdapterView.OnItemClickListener onItemClickListener) {
+            super(containerView);
+            rootView = containerView;
+            itemView.setOnClickListener(this);
+            mAdapter = adapter;
+            mOnItemClickListener = onItemClickListener;
+            mContextRef = new WeakReference<>(context);
+        }
 
-        Picasso.with(context).load(imageUri)
-                .into(posterImageView);
+        @Override
+        public void onClick(View view) {
+            mAdapter.onItemHolderClick(mOnItemClickListener, this);
+        }
 
-        ImageLoader loader = AppHandles.getImageLoader();
-        loader.loadImage(imageUri.toString(), posterImageView);
+        private void bindMovieObject(Cursor cursor) {
+            ImageView posterImageView = (ImageView) rootView.findViewById(R.id.movie_poster);
+
+            int moviePosterColumn = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER);
+            String moviePoster = cursor.getString(moviePosterColumn);
+
+            Log.i(LOG_TAG + " ***** Image uri:", MOVIE_DB_URL_PREFIX + moviePoster);
+
+            ImageLoader loader = AppHandles.getImageLoader();
+            loader.loadImage(MOVIE_DB_URL_PREFIX + moviePoster, posterImageView);
+        }
+    }
+
+    private void onItemHolderClick(AdapterView.OnItemClickListener onItemClickListener, MovieListAdapter.MovieViewHolder movieViewHolder) {
+        if (onItemClickListener != null) {
+            onItemClickListener.onItemClick(null, movieViewHolder.itemView, movieViewHolder.getAdapterPosition(), movieViewHolder.getItemId());
+        }
     }
 }

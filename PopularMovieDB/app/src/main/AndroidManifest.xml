@@ -38,6 +38,10 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".activities.HomeActivity"/>
         </activity>
+
+        <provider
+                android:authorities="udacity.com.popularmoviedb.app"
+                android:name=".data.MovieContentProvider"/>
     </application>
 
 </manifest>
