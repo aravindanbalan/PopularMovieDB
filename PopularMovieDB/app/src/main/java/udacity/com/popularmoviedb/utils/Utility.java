@@ -23,13 +23,14 @@ import udacity.com.popularmoviedb.models.Movie;
 
 import static udacity.com.popularmoviedb.IConstants.YOUTUBE_INTENT;
 import static udacity.com.popularmoviedb.IConstants.YOUTUBE_TRAILER_URL;
-import static udacity.com.popularmoviedb.adapters.MovieListCursorAdapter.LOG_TAG;
 
 /**
  * Created by arbalan on 9/23/16.
  */
 
 public class Utility {
+    private static final String LOG_TAG = Utility.class.getSimpleName();
+
     public static String getSortOrder(Context context) {
         SharedPreferences sharedPrefs =
                 PreferenceManager.getDefaultSharedPreferences(context);
@@ -97,7 +98,7 @@ public class Utility {
         }
     }
 
-    private void watchYoutubeVideo(Activity activity, String id) {
+    public static void watchYoutubeVideo(Activity activity, String id) {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(YOUTUBE_INTENT + id));
             activity.startActivity(intent);

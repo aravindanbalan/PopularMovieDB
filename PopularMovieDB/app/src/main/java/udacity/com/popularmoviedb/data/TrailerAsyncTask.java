@@ -52,7 +52,7 @@ public class TrailerAsyncTask extends AsyncTask<String, Void, List<Trailer>> {
 
             String resultJson = Utility.makeServiceCall(uri);
             try {
-                List<Trailer> trailerList = DataParser.getTrailerDataFromJson(resultJson);
+                return DataParser.getTrailerDataFromJson(resultJson);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage());
             }

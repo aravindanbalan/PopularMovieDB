@@ -6,9 +6,9 @@
                   android:id="@+id/movie_detail_layout"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
+                  android:layout_height="match_parent"
                   android:visibility="gone"
-                  android:padding="@dimen/margin_medium">
+                  android:padding="@dimen/padding">
 
         <LinearLayout android:layout_width="match_parent"
                       android:layout_height="wrap_content"
@@ -55,7 +55,16 @@
         <ListView
                 android:id="@+id/list_view_trailers"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:paddingTop="@dimen/margin_small"/>
+
+        <ListView
+                android:id="@+id/list_view_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:paddingTop="@dimen/margin_small"/>
 
 
     </LinearLayout>

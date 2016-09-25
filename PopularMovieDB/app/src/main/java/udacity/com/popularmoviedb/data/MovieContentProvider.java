@@ -370,10 +370,6 @@ public class MovieContentProvider extends ContentProvider {
         return uriMatcher;
     }
 
-    private static String getMovieIdFromUri(Uri uri) {
-        return uri.getPathSegments().get(1);
-    }
-
     private static String getMovieIdFromFavoriteUri(Uri uri) {
         return uri.getPathSegments().get(2);
     }
