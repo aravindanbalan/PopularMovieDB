@@ -10,6 +10,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import static udacity.com.popularmoviedb.IConstants.FAV_STATUS;
+
 /**
  * Created by arbalan on 9/23/16.
  */
@@ -21,7 +23,7 @@ public class MovieContentProvider extends ContentProvider {
     static final int MOVIE = 100;
     static final int MOVIE_WITH_ID = 101;
     static final int FAVORITE = 102;
-    static final int FAVORITE_WITH_ID = 103;
+    static final int FAVORITE_WITH_ID_STATUS = 103;
     static final int TRAILER = 104;
     static final int TRAILER_WITH_ID = 105;
     static final int REVIEW = 106;
@@ -78,17 +80,18 @@ public class MovieContentProvider extends ContentProvider {
                         sortOrder);
                 break;
 
-            case FAVORITE_WITH_ID:
-                _id = MovieContract.MovieEntry.getIdFromUri(uri);
-                cursor = db.query(
-                        MovieContract.MovieEntry.TABLE_NAME,
-                        projection,
-                        MovieContract.MovieEntry._ID + " = ? AND " + MovieContract.MovieEntry.COLUMN_FAVORITE + " = 1",
-                        new String[] { Long.toString(_id) },
-                        null,
-                        null,
-                        sortOrder);
-                break;
+            //TODO to be moved to update
+//            case FAVORITE_WITH_ID_STATUS:
+//                _id = MovieContract.MovieEntry.getIdFromUri(uri);
+//                cursor = db.query(
+//                        MovieContract.MovieEntry.TABLE_NAME,
+//                        projection,
+//                        MovieContract.MovieEntry._ID + " = ? AND " + MovieContract.MovieEntry.COLUMN_FAVORITE + " = 1",
+//                        new String[] { Long.toString(_id) },
+//                        null,
+//                        null,
+//                        sortOrder);
+//                break;
 
             case TRAILER:
                 cursor = db.query(
@@ -161,7 +164,7 @@ public class MovieContentProvider extends ContentProvider {
             case FAVORITE:
                 return MovieContract.MovieEntry.CONTENT_TYPE_FAVORITE;
 
-            case FAVORITE_WITH_ID:
+            case FAVORITE_WITH_ID_STATUS:
                 return MovieContract.MovieEntry.CONTENT_ITEM_TYPE_FAVORITE;
 
             case TRAILER:
@@ -282,6 +285,21 @@ public class MovieContentProvider extends ContentProvider {
                         selectionArgs);
                 break;
 
+            case FAVORITE_WITH_ID_STATUS:
+                String movieId = Long.toString(MovieContract.MovieEntry.getIdFromUri(uri));
+                String favoriteFlag = getMovieIdFromFavoriteUri(uri);
+
+                selectionArgs = new String[]{movieId};
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, favoriteFlag);
+
+                rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME,
+                        contentValues,
+                        MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ",
+                        selectionArgs);
+                Log.i(LOG_TAG, "************ Setting as favorite : " + movieId + " status : " + favoriteFlag + " updated : " + rowsUpdated);
+                break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -341,13 +359,23 @@ public class MovieContentProvider extends ContentProvider {
         uriMatcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
         uriMatcher.addURI(authority, MovieContract.PATH_MOVIE + "/#", MOVIE_WITH_ID);
         uriMatcher.addURI(authority, MovieContract.PATH_FAVORITE, FAVORITE);
-        uriMatcher.addURI(authority, MovieContract.PATH_FAVORITE + "/#", FAVORITE_WITH_ID);
+        uriMatcher.addURI(authority, MovieContract.PATH_FAVORITE + "/#/*", FAVORITE_WITH_ID_STATUS);
 
         uriMatcher.addURI(authority, MovieContract.PATH_TRAILER, TRAILER);
         uriMatcher.addURI(authority, MovieContract.PATH_TRAILER + "/#", TRAILER_WITH_ID);
 
         uriMatcher.addURI(authority, MovieContract.PATH_REVIEW, REVIEW);
         uriMatcher.addURI(authority, MovieContract.PATH_REVIEW + "/#", REVIEW_WITH_ID);
+
         return uriMatcher;
     }
+
+    private static String getMovieIdFromUri(Uri uri) {
+        return uri.getPathSegments().get(1);
+    }
+
+    private static String getMovieIdFromFavoriteUri(Uri uri) {
+        return uri.getPathSegments().get(2);
+    }
+
 }

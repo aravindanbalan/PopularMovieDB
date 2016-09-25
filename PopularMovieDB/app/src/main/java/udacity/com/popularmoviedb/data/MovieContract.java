@@ -5,6 +5,8 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import static udacity.com.popularmoviedb.IConstants.FAV_STATUS;
+
 /**
  * Created by arbalan on 9/23/16.
  */
@@ -53,8 +55,12 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI_MOVIE, id);
         }
 
-        public static Uri buildFavoriteUri(long id) {
-            return ContentUris.withAppendedId(CONTENT_URI_FAVORITE, id);
+        public static Uri buildFavoriteUri(long id, boolean status) {
+//            return ContentUris.withAppendedId(CONTENT_URI_FAVORITE, id);
+            return CONTENT_URI_FAVORITE.buildUpon()
+                    .appendPath(Long.toString(id))
+                    .appendPath(Boolean.toString(status))
+                    .build();
         }
 
 

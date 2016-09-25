@@ -41,7 +41,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private TextView mMovieOverview;
     private TextView mMovieVoteAverage;
     private ImageView mMoviePoster;
+    private String mMovieId;
     private static final int DETAILS_LOADER = 0;
+    private static final int TRAILERS_LOADER = 1;
+    private static final int REVIEWS_LOADER = 2;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -58,6 +61,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(DETAILS_LOADER, null, this);
+        getLoaderManager().initLoader(TRAILERS_LOADER, null, this);
+        getLoaderManager().initLoader(REVIEWS_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -65,22 +70,70 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
         if(getArguments() == null) return null;
-
         Uri movieUri = getArguments().getParcelable(MOVIE_PARAMS);
-        String movieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
+        mMovieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
 
-        return new CursorLoader(
-                getActivity(),
-                movieUri,
-                null,
-                null,
-                null,
-                null
-        );
+        switch (id){
+            case DETAILS_LOADER:
+
+                return new CursorLoader(
+                        getActivity(),
+                        movieUri,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+            case TRAILERS_LOADER:
+                Uri trailerUri = MovieContract.TrailerEntry.buildTrailerUri(Long.parseLong(mMovieId));
+
+                return new CursorLoader(
+                        getActivity(),
+                        trailerUri,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+            case REVIEWS_LOADER:
+                Uri reviewUri = MovieContract.ReviewEntry.buildReviewUri(Long.parseLong(mMovieId));
+
+                return new CursorLoader(
+                        getActivity(),
+                        reviewUri,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+
+            default:
+                return null;
+        }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
+        int id = cursorLoader.getId();
+
+        switch (id){
+            case DETAILS_LOADER:
+                detailsOnLoadFinished(data);
+                break;
+            case TRAILERS_LOADER:
+                trailersOnLoadFinished(data);
+                break;
+            case REVIEWS_LOADER:
+                reviewsOnLoadFinished(data);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+    }
+
+    private void detailsOnLoadFinished(Cursor data){
         if (data != null) {
             if (!data.moveToFirst()) {
                 return;
@@ -119,7 +172,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         }
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    private void trailersOnLoadFinished(Cursor data){
+
+    }
+
+    private void reviewsOnLoadFinished(Cursor data){
+
     }
 }

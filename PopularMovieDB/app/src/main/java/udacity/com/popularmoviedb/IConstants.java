@@ -15,6 +15,8 @@ public interface IConstants {
     String MOVIE_RELEASE_DATE = "release_date";
     String MOVIE_POPULARITY = "popularity";
 
+    String FAV_STATUS = "status";
+
     String TRAILER_NAME = "name";
     String TRAILER_YOUTUBE_KEY = "key";
 
