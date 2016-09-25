@@ -15,12 +15,6 @@ import android.util.Log;
 
 import org.json.JSONException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Vector;
 
@@ -28,10 +22,11 @@ import udacity.com.popularmoviedb.BuildConfig;
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.models.Movie;
-import udacity.com.popularmoviedb.utils.MovieDataParser;
 import udacity.com.popularmoviedb.utils.Utility;
 
 import static udacity.com.popularmoviedb.IConstants.*;
+import static udacity.com.popularmoviedb.utils.DataParser.getMovieDataFromJson;
+import static udacity.com.popularmoviedb.utils.Utility.makeServiceCall;
 
 /**
  * Created by arbalan on 9/24/16.
@@ -48,8 +43,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         String page = extras.getString(PAGE_QUERY_EXTRA);
         Log.i(LOG_TAG, "**** starting to sync" + page);
-        List<Movie> movies = getJsonDataFromWeatherApI(page);
-        bulkInsertToDB(movies);
+        List<Movie> movies = getJsonDataFromApi(page);
+        bulkInsertMoviesToDB(movies);
     }
 
     public static void syncImmediately(Context context, String page) {
@@ -99,86 +94,33 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         return newAccount;
     }
 
-
-    private List<Movie> getJsonDataFromWeatherApI(String page) {
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-
+    private List<Movie> getJsonDataFromApi(String page) {
         String resultJson;
         String sortOrder = Utility.getSortOrder(getContext());
 
+        Uri.Builder builder;
+        if(TextUtils.isEmpty(sortOrder)){
+           sortOrder = getContext().getString(R.string.sort_popular);
+        }
+            builder = new Uri.Builder().encodedPath(BASE_DISCOVER_URL)
+                    .appendQueryParameter(SORT_PARAM, sortOrder)
+                    .appendQueryParameter(PAGE_PARAM, page)
+                    .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIE_DB_API_KEY);
+
+        Uri uri = builder.build();
+
+        resultJson = makeServiceCall(uri);
+        Log.i(LOG_TAG, "Movie results output : json : " + resultJson);
+
         try {
-            Uri.Builder builder;
-            if (!TextUtils.isEmpty(sortOrder) && sortOrder.equalsIgnoreCase(getContext().getString(R.string.sort_top_rated))) {
-                builder = new Uri.Builder().encodedPath(BASE_URL_TOP_RATED)
-                        .appendQueryParameter(PAGE_PARAM, page)
-                        .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIE_DB_API_KEY);
-            } else {
-                //default to popular
-                builder = new Uri.Builder().encodedPath(BASE_URL_POPULAR)
-                        .appendQueryParameter(PAGE_PARAM, page)
-                        .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIE_DB_API_KEY);
-            }
-
-            Uri uri = builder.build();
-            Log.i(LOG_TAG, "********* URL : " + uri.toString());
-            URL url = new URL(uri.toString());
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-            InputStream inputStream = urlConnection.getInputStream();
-            if (inputStream == null) {
-                // Nothing to do.
-                return null;
-            }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            StringBuilder buffer = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
-                buffer.append(line)
-                        .append("\n");
-            }
-
-            if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
-                return null;
-            }
-            resultJson = buffer.toString();
-            Log.i(LOG_TAG, "Movie results output : json : " + resultJson);
-
-            try {
-                return MovieDataParser.getMovieDataFromJson(resultJson);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
-
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
-            // If the code didn't successfully get the weather data, there's no point in attemping
-            // to parse it.
-            return null;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
-                }
-            }
+            return getMovieDataFromJson(resultJson);
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, e.getMessage());
         }
         return null;
     }
 
-    private void bulkInsertToDB(List<Movie> movies) {
+    private void bulkInsertMoviesToDB(List<Movie> movies) {
         if (movies != null) {
             Vector<ContentValues> cVVector = new Vector<>(movies.size());
 
@@ -204,8 +146,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 cVVector.toArray(cvArray);
                 inserted = getContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI_MOVIE, cvArray);
             }
-
-            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted");
+            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted all movies");
         }
     }
 }

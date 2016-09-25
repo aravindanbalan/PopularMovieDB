@@ -24,7 +24,7 @@ import udacity.com.popularmoviedb.BuildConfig;
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.models.Movie;
-import udacity.com.popularmoviedb.utils.MovieDataParser;
+import udacity.com.popularmoviedb.utils.DataParser;
 import udacity.com.popularmoviedb.utils.Utility;
 
 import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
@@ -106,7 +106,7 @@ public class MovieFetchService extends IntentService {
             Log.i(LOG_TAG, "Movie results output : json : " + resultJson);
 
             try {
-                return MovieDataParser.getMovieDataFromJson(resultJson);
+                return DataParser.getMovieDataFromJson(resultJson);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage());
             }

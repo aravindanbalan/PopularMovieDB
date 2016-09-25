@@ -16,6 +16,8 @@ public class MovieContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static final String PATH_MOVIE = "movie";
+    public static final String PATH_TRAILER = "trailer";
+    public static final String PATH_REVIEW = "review";
     public static final String PATH_FAVORITE = "favorite";
 
     public static final class MovieEntry implements BaseColumns {
@@ -55,6 +57,57 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI_FAVORITE, id);
         }
 
+
+        public static long getIdFromUri(Uri uri) {
+            return ContentUris.parseId(uri);
+        }
+    }
+
+    public static final class TrailerEntry implements BaseColumns {
+        public static final Uri CONTENT_URI_TRAILER =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TRAILER).build();
+
+        public static final String CONTENT_TYPE_TRAILER =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TRAILER;
+        public static final String CONTENT_ITEM_TYPE_TRAILER =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TRAILER;
+
+        public static final String TABLE_NAME = "trailer";
+
+        public static final String COLUMN_TRAILER_ID = "id";
+        public static final String COLUMN_TRAILER_NAME = "name";
+        public static final String COLUMN_TRAILER_YOUTUBE_KEY = "youtube_key";
+        public static final String COLUMN_TRAILER_MOVIE_ID = "movie_id";
+
+        public static Uri buildTrailerUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI_TRAILER, id);
+        }
+
+        public static long getIdFromUri(Uri uri) {
+            return ContentUris.parseId(uri);
+        }
+    }
+
+    public static final class ReviewEntry implements BaseColumns {
+        public static final Uri CONTENT_URI_REVIEW =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_REVIEW).build();
+
+        public static final String CONTENT_TYPE_REVIEW =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEW;
+        public static final String CONTENT_ITEM_TYPE_REVIEW =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEW;
+
+        public static final String TABLE_NAME = "review";
+
+        public static final String COLUMN_REVIEW_ID = "id";
+        public static final String COLUMN_REVIEW_AUTHOR_NAME = "author";
+        public static final String COLUMN_REVIEW_CONTENT = "content";
+        public static final String COLUMN_REVIEW_MOVIE_ID = "movie_id";
+        public static final String COLUMN_REVIEW_URL = "url";
+
+        public static Uri buildReviewUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI_REVIEW, id);
+        }
 
         public static long getIdFromUri(Uri uri) {
             return ContentUris.parseId(uri);

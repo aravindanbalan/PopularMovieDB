@@ -22,16 +22,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ListView;
 
 import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.activities.SettingsActivity;
 import udacity.com.popularmoviedb.adapters.MovieListAdapter;
-import udacity.com.popularmoviedb.adapters.MovieListCursorAdapter;
 import udacity.com.popularmoviedb.data.MovieContract;
-import udacity.com.popularmoviedb.services.MovieFetchService;
 import udacity.com.popularmoviedb.sync.MovieSyncAdapter;
 import udacity.com.popularmoviedb.utils.RecyclerViewScrollListener;
 import udacity.com.popularmoviedb.utils.Utility;
@@ -151,15 +147,21 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
     }
 
     private void refreshMovieData() {
-        getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI_MOVIE,null , null);
+        deleteAllPreviousDataFromDB();
         MovieSyncAdapter.syncImmediately(getActivity(), Integer.toString(1));
     }
 
-    private void setAlarm(Intent intent, long triggerInMilliSeconds){
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0,intent,PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager am=(AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+    private void setAlarm(Intent intent, long triggerInMilliSeconds) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager am = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
         //Set the AlarmManager to wake up the system.
         am.set(AlarmManager.RTC_WAKEUP, triggerInMilliSeconds, pendingIntent);
+    }
+
+    private void deleteAllPreviousDataFromDB() {
+        getContext().getContentResolver().delete(MovieContract.TrailerEntry.CONTENT_URI_TRAILER, null, null);
+        getContext().getContentResolver().delete(MovieContract.ReviewEntry.CONTENT_URI_REVIEW, null, null);
+        getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI_MOVIE, null, null);
     }
 
     public interface Callback {
