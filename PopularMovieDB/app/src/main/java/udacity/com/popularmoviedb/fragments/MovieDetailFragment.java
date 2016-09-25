@@ -67,7 +67,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mTrailerListView = (ListView) rootView.findViewById(R.id.list_view_trailers);
         mReviewsListView = (ListView) rootView.findViewById(R.id.list_view_reviews);
 
-
         if (savedInstanceState != null) {
             mMovieId = savedInstanceState.getString(MOVIE_ID_KEY);
         }
@@ -88,8 +87,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         });
 
 
-        //FIXME
-//        mReviewAdapter = new ReviewAdapter(getContext(), null, 0);
+        mReviewAdapter = new ReviewAdapter(getContext(), null, 0);
+        mReviewsListView.setAdapter(mReviewAdapter);
 
         return rootView;
     }
@@ -177,6 +176,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onLoaderReset(Loader<Cursor> loader) {
         if(loader.getId() == TRAILERS_LOADER){
             mTrailerAdapter.swapCursor(null);
+        } else if(loader.getId() == REVIEWS_LOADER){
+            mReviewAdapter.swapCursor(null);
         }
     }
 
@@ -238,12 +239,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     private void reviewsOnLoadFinished(Cursor data) {
-//        if (data != null) {
-//            if (!data.moveToFirst()) {
-//                return;
-//            }
-//        }
-
-        //TODO reviewAdapter swapcursor
+        mReviewAdapter.swapCursor(data);
+        mReviewsListView.setVisibility(View.VISIBLE);
     }
 }

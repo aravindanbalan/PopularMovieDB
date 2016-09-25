@@ -35,7 +35,7 @@ public class ReviewAsyncTask extends AsyncTask<String, Void, List<Review>> {
         if (params.length < 1) {
             return null;
         }
-
+        movieId = params[0];
         if (!TextUtils.isEmpty(movieId)) {
             Uri.Builder builder;
             String baseReviewUrl = BASE_URL + movieId + RESOURCE_REVIEW;

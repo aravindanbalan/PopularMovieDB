@@ -22,11 +22,11 @@ public interface IConstants {
 
     String REVIEW_URL = "url";
     String REVIEW_CONTENT = "content";
-    String REVIEW_AUTHOR = "content";
+    String REVIEW_AUTHOR = "author";
 
     String MOVIE_ID_KEY = "movieId";
 
-    String BASE_DISCOVER_URL = "https://api.themoviedb.org/3/discover/movie?";
+    String BASE_DISCOVER_URL = "http://api.themoviedb.org/3/discover/movie?";
     String MOVIE_DB_URL_PREFIX = "http://image.tmdb.org/t/p/w185";
     String MOVIE_PARAMS = "movie_params";
     String YOUTUBE_TRAILER_URL = "https://www.youtube.com/watch?v=";
