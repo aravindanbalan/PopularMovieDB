@@ -25,6 +25,7 @@ public interface IConstants {
     String REVIEW_AUTHOR = "author";
 
     String SORT_ORDER_ID_KEY = "sort_order_key";
+    String DETAILS_SCREEN_STATE_KEY = "details_fragment_state";
     String MOVIE_ID_KEY = "movieId_key";
     String TRAILER_KEY = "trailer_key";
     String REVIEW_KEY = "review_key";
@@ -33,8 +34,8 @@ public interface IConstants {
     String FAV_ADDED = " added to favorites";
     String FAV_REMOVED = " removed from favorites";
 
-    String MOVIE_DB_URL_PREFIX_500 = "http://image.tmdb.org/t/p/w185";
-    String MOVIE_DB_URL_PREFIX_92 = "http://image.tmdb.org/t/p/w500";
+    String MOVIE_DB_URL_PREFIX_185 = "http://image.tmdb.org/t/p/w185";
+    String MOVIE_DB_URL_PREFIX_500 = "http://image.tmdb.org/t/p/w500";
     String MOVIE_PARAMS = "movie_params";
     String YOUTUBE_TRAILER_URL = "https://www.youtube.com/watch?v=";
     String YOUTUBE_INTENT = "vnd.youtube:";

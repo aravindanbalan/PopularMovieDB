@@ -1,5 +1,6 @@
 package udacity.com.popularmoviedb.fragments;
 
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -62,9 +63,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final int DETAILS_LOADER = 0;
     private static final int TRAILERS_LOADER = 1;
     private static final int REVIEWS_LOADER = 2;
+    private Uri mMovieUri;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mMovieUri = getArguments().getParcelable(MOVIE_PARAMS);
+        }
+
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
         mMovieDetailLayout = (LinearLayout) rootView.findViewById(R.id.movie_detail_layout);
         mMovieTitle = (TextView) rootView.findViewById(R.id.movie_title);
@@ -79,7 +87,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i(LOG_TAG, "********** toggle button : "+ isChecked);
                 setFavoriteState(isChecked);
                 updateDBWithStatus(isChecked);
             }
@@ -93,9 +100,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        getLoaderManager().initLoader(DETAILS_LOADER, null, this);
-        getLoaderManager().initLoader(TRAILERS_LOADER, null, this);
-        getLoaderManager().initLoader(REVIEWS_LOADER, null, this);
 
         if (savedInstanceState != null) {
             mMovieId = savedInstanceState.getString(MOVIE_ID_KEY);
@@ -109,6 +113,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             mReviews = new ArrayList<>();
         }
 
+        getLoaderManager().initLoader(DETAILS_LOADER, null, this);
+        getLoaderManager().initLoader(TRAILERS_LOADER, null, this);
+        getLoaderManager().initLoader(REVIEWS_LOADER, null, this);
+
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -116,6 +124,24 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mReviews = new ArrayList<>();
         mTrailers = new ArrayList<>();
         mMovieDetailLayout.setVisibility(View.GONE);
+    }
+
+    public void restartLoader() {
+        //do only if the movieUri is null. This is to retain already selected movie before on Resume is called again.
+        if (mMovieUri == null) {
+            Cursor cursor = getContext().getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI_MOVIE, new String[] { MovieContract.MovieEntry._ID }, null, null, null);
+
+            if (cursor != null && cursor.moveToPosition(0)) {
+                mMovieUri = MovieContract.MovieEntry.buildMovieUri(cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry._ID)));
+
+                Loader loader = getLoaderManager().getLoader(DETAILS_LOADER);
+                if (loader != null) {
+                    getLoaderManager().restartLoader(DETAILS_LOADER, null, this);
+                } else {
+                    getLoaderManager().initLoader(DETAILS_LOADER, null, this);
+                }
+            }
+        }
     }
 
     @Override
@@ -129,49 +155,73 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        if (getArguments() == null) return null;
-        Uri movieUri = getArguments().getParcelable(MOVIE_PARAMS);
-        mMovieId = Utility.fetchMovieIdFromUri(getActivity(), movieUri);
+        if (mMovieUri != null) {
+            mMovieId = Utility.fetchMovieIdFromUri(getActivity(), mMovieUri);
 
-        switch (id) {
-            case DETAILS_LOADER:
-
-                return new CursorLoader(
-                        getActivity(),
-                        movieUri,
-                        null,
-                        null,
-                        null,
-                        null
-                );
-
-
-            case TRAILERS_LOADER:
-                Uri trailerUri = MovieContract.TrailerEntry.buildTrailerUri(Long.parseLong(mMovieId));
-
-                return new CursorLoader(
-                        getActivity(),
-                        trailerUri,
-                        null,
-                        null,
-                        null,
-                        null
-                );
-            case REVIEWS_LOADER:
-                Uri reviewUri = MovieContract.ReviewEntry.buildReviewUri(Long.parseLong(mMovieId));
-
-                return new CursorLoader(
-                        getActivity(),
-                        reviewUri,
-                        null,
-                        null,
-                        null,
-                        null
-                );
-
-            default:
+            if (mMovieId == null) {
                 return null;
+            }
+
+            switch (id) {
+                case DETAILS_LOADER:
+
+                    return new CursorLoader(
+                            getActivity(),
+                            mMovieUri,
+                            null,
+                            null,
+                            null,
+                            null
+                    );
+
+                case TRAILERS_LOADER:
+                    Uri trailerUri = MovieContract.TrailerEntry.buildTrailerUri(Long.parseLong(mMovieId));
+
+                    return new CursorLoader(
+                            getActivity(),
+                            trailerUri,
+                            null,
+                            null,
+                            null,
+                            null
+                    );
+                case REVIEWS_LOADER:
+                    Uri reviewUri = MovieContract.ReviewEntry.buildReviewUri(Long.parseLong(mMovieId));
+
+                    return new CursorLoader(
+                            getActivity(),
+                            reviewUri,
+                            null,
+                            null,
+                            null,
+                            null
+                    );
+
+                default:
+                    return null;
+            }
+        } else {
+
+            Cursor cursor = getContext().getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI_MOVIE, new String[] { MovieContract.MovieEntry._ID }, null, null, null);
+
+            if (cursor != null && cursor.moveToPosition(0)) {
+                mMovieUri = MovieContract.MovieEntry.buildMovieUri(cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry._ID)));
+                cursor.close();
+
+                return new CursorLoader(
+                        getActivity(),
+                        mMovieUri,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+
+            } else {
+                Log.i(LOG_TAG, "cursor is null");
+            }
         }
+        return null;
     }
 
     @Override
@@ -270,7 +320,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             mFavorite.setTag(favoriteValues);
 
             ImageLoader loader = AppHandles.getImageLoader();
-            loader.loadImage(MOVIE_DB_URL_PREFIX_92 + poster, mMoviePoster, new Callback() {
+
+            loader.loadImage(MOVIE_DB_URL_PREFIX_185 + poster, mMoviePoster, new Callback() {
                 @Override
                 public void onSuccess() {
                     if (mMovieDetailLayout != null) {
@@ -350,7 +401,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 String author = cursor.getString(cursor.getColumnIndexOrThrow(MovieContract.ReviewEntry.COLUMN_REVIEW_AUTHOR_NAME));
                 String content = cursor.getString(cursor.getColumnIndexOrThrow(MovieContract.ReviewEntry.COLUMN_REVIEW_CONTENT));
 
-                String formatted_author_name = getResources().getString(R.string.review_by_text,author);
+                String formatted_author_name = getResources().getString(R.string.review_by_text, author);
 
                 authorName.setText(formatted_author_name);
                 contentView.setText(content);
@@ -401,7 +452,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             TextView contentView = (TextView) reviewView.findViewById(R.id.list_item_review_content);
             String author = review.getReviewAuthor();
             String content = review.getReviewContent();
-            String formatted_author_name = getResources().getString(R.string.review_by_text,author);
+            String formatted_author_name = getResources().getString(R.string.review_by_text, author);
 
             authorName.setText(formatted_author_name);
             contentView.setText(content);

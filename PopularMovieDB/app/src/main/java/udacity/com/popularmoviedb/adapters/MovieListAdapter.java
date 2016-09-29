@@ -3,7 +3,6 @@ package udacity.com.popularmoviedb.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.utils.AppHandles;
 import udacity.com.popularmoviedb.utils.ImageLoader;
 
-import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX_500;
+import static udacity.com.popularmoviedb.IConstants.MOVIE_DB_URL_PREFIX_185;
 
 /**
  * Created by arbalan on 9/23/16.
@@ -78,7 +77,7 @@ public class MovieListAdapter extends CursorRecyclerAdapter {
             int height = context.getResources().getDisplayMetrics().heightPixels;
 
             ImageLoader loader = AppHandles.getImageLoader();
-            loader.loadImage(MOVIE_DB_URL_PREFIX_500 + moviePoster, posterImageView, width / 2, height / 2);
+            loader.loadImage(MOVIE_DB_URL_PREFIX_185 + moviePoster, posterImageView, width / 2, height / 2);
         }
     }
 

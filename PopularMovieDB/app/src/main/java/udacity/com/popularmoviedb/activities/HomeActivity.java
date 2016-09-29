@@ -5,9 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import udacity.com.popularmoviedb.ItemClickCallback;
 import udacity.com.popularmoviedb.R;
@@ -35,6 +35,17 @@ public class HomeActivity extends AppCompatActivity implements ItemClickCallback
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.movie_detail_container, new MovieDetailFragment(), MOVIE_DETAIL_FRAGMENT_TAG)
                         .commit();
+            } else {
+                //TOIDO show detail fragment
+                boolean details_fragment_state = Utility.getDetailsFragmentState(getContext());
+
+                //if details fragment was clicked, restore it to the same state on rotation
+                if (details_fragment_state) {
+                    View view = findViewById(R.id.movie_detail_container);
+                    if (view != null) {
+                        view.setVisibility(View.VISIBLE);
+                    }
+                }
             }
         } else {
             mIsTablet = false;
@@ -99,15 +110,26 @@ public class HomeActivity extends AppCompatActivity implements ItemClickCallback
     @Override
     public void onItemSelected(Uri uri) {
         if (mIsTablet) {
-            Bundle args = new Bundle();
-            args.putParcelable(MOVIE_PARAMS, uri);
+            View view = findViewById(R.id.movie_detail_container);
+            if (view != null) {
+                view.setVisibility(View.VISIBLE);
+                Utility.saveDetailsFragmentState(getContext(), true);
 
-            MovieDetailFragment fragment = new MovieDetailFragment();
-            fragment.setArguments(args);
+                Bundle args = new Bundle();
+                args.putParcelable(MOVIE_PARAMS, uri);
 
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, fragment, MOVIE_DETAIL_FRAGMENT_TAG)
-                    .commit();
+                MovieDetailFragment fragment = new MovieDetailFragment();
+                fragment.setArguments(args);
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, fragment, MOVIE_DETAIL_FRAGMENT_TAG)
+                        .commit();
+
+                HomeFragment ff = (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_home);
+                if (ff != null) {
+                    ff.onDetailFragmentShown();
+                }
+            }
         } else {
             Intent activityIntent = new Intent(this, DetailsActivity.class);
             activityIntent.putExtra(MOVIE_PARAMS, uri);

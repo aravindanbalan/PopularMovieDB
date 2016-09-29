@@ -30,6 +30,10 @@ public class FavoritesFragment  extends Fragment implements MovieListAdapter.Mov
     private static final int FAVORITE_LOADER = 0;
     private int mPosition = -1;
     private static final String SELECTED_POSITION = "selected_position";
+    private static final int PORTRAIT_COLUMNS = 2;
+    private static final int PORTRAIT_COLUMNS_WITHOUT_DETAILFRAGMENT = 2;
+    private static final int LANDSCAPE_COLUMNS = 3;
+    private static final int LANDSCAPE_COLUMNS_WITHOUT_DETAILFRAGMENT = 4;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -39,9 +43,9 @@ public class FavoritesFragment  extends Fragment implements MovieListAdapter.Mov
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_list);
         GridLayoutManager gridLayoutManager;
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+            gridLayoutManager = new GridLayoutManager(getActivity(), PORTRAIT_COLUMNS_WITHOUT_DETAILFRAGMENT);
         } else {
-            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
+            gridLayoutManager = new GridLayoutManager(getActivity(), LANDSCAPE_COLUMNS_WITHOUT_DETAILFRAGMENT);
         }
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setAdapter(mMovieListAdapter);
@@ -104,4 +108,17 @@ public class FavoritesFragment  extends Fragment implements MovieListAdapter.Mov
         }
         mPosition = position;
     }
+
+    public void onDetailsFragmentShown(){
+        if(mRecyclerView!=null) {
+            GridLayoutManager gridLayoutManager;
+            if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                gridLayoutManager = new GridLayoutManager(getActivity(), PORTRAIT_COLUMNS);
+            } else {
+                gridLayoutManager = new GridLayoutManager(getActivity(), LANDSCAPE_COLUMNS);
+            }
+            mRecyclerView.setLayoutManager(gridLayoutManager);
+        }
+    }
+
 }

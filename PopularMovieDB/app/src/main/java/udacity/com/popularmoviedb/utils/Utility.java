@@ -22,6 +22,7 @@ import udacity.com.popularmoviedb.R;
 import udacity.com.popularmoviedb.data.MovieContract;
 import udacity.com.popularmoviedb.models.Movie;
 
+import static android.R.attr.factor;
 import static android.R.attr.order;
 import static udacity.com.popularmoviedb.IConstants.*;
 import static udacity.com.popularmoviedb.PopularMovieApplication.getContext;
@@ -58,49 +59,20 @@ public class Utility {
         editor.commit();
     }
 
-    public static void clearStoredSortOrder(Context context){
+    public static void saveDetailsFragmentState(Context context, boolean state){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.remove(SORT_ORDER_ID_KEY);
+        editor.putBoolean(DETAILS_SCREEN_STATE_KEY, state);
         editor.commit();
     }
 
-    public static Movie convertCursorToMovie(Cursor movieCursor) {
-        if (movieCursor == null) {
-            return null;
-        }
-
-        Movie movie = new Movie();
-
-        int column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
-        String movieId = movieCursor.getString(column);
-
-        column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER);
-        String moviePoster = movieCursor.getString(column);
-
-        column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_SYNOPSIS);
-        String movieSynopsis = movieCursor.getString(column);
-
-        column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVG);
-        Double movieVoteAvg = movieCursor.getDouble(column);
-
-        column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE);
-        String movieTitle = movieCursor.getString(column);
-
-        column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE);
-        String movieReleaseDate = movieCursor.getString(column);
-
-        column = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POPULARITY);
-        Double moviePopularity = movieCursor.getDouble(column);
-
-        movie.setId(movieId);
-        movie.setPosterUrl(moviePoster);
-        movie.setMovieOverview(movieSynopsis);
-        movie.setVoteAverage(movieVoteAvg);
-        movie.setTitle(movieTitle);
-        movie.setMovieReleaseDate(movieReleaseDate);
-        movie.setPopularity(moviePopularity);
-        return movie;
+    public static boolean getDetailsFragmentState(Context context){
+        SharedPreferences sharedPrefs =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        boolean sortOrder = sharedPrefs.getBoolean(
+                DETAILS_SCREEN_STATE_KEY,
+                false);
+        return sortOrder;
     }
 
     public static String fetchMovieIdFromUri(Context context, Uri movieUri) {

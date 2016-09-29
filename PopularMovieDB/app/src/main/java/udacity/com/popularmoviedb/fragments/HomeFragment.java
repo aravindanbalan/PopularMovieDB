@@ -35,6 +35,10 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
     private RecyclerView mRecyclerView;
     private int mPosition = -1;
     private static final String SELECTED_POSITION = "selected_position";
+    private static final int PORTRAIT_COLUMNS = 2;
+    private static final int PORTRAIT_COLUMNS_WITHOUT_DETAILFRAGMENT = 2;
+    private static final int LANDSCAPE_COLUMNS = 3;
+    private static final int LANDSCAPE_COLUMNS_WITHOUT_DETAILFRAGMENT = 4;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,9 +52,9 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_list);
         GridLayoutManager gridLayoutManager;
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+            gridLayoutManager = new GridLayoutManager(getActivity(), PORTRAIT_COLUMNS_WITHOUT_DETAILFRAGMENT);
         } else {
-            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
+            gridLayoutManager = new GridLayoutManager(getActivity(), LANDSCAPE_COLUMNS_WITHOUT_DETAILFRAGMENT);
         }
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setAdapter(mMovieListAdapter);
@@ -83,6 +87,18 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
         super.onSaveInstanceState(outState);
     }
 
+    public void onDetailFragmentShown(){
+        if(mRecyclerView!=null) {
+            GridLayoutManager gridLayoutManager;
+            if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                gridLayoutManager = new GridLayoutManager(getActivity(), PORTRAIT_COLUMNS);
+            } else {
+                gridLayoutManager = new GridLayoutManager(getActivity(), LANDSCAPE_COLUMNS);
+            }
+            mRecyclerView.setLayoutManager(gridLayoutManager);
+        }
+    }
+
     public void onSettingChanged() {
 
         String sortOrder = Utility.getSortOrder(getContext());
@@ -98,7 +114,7 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
         refreshMovieData();
     }
 
-    public void restartLoader(){
+    public void restartLoader() {
         getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
     }
 
@@ -110,10 +126,7 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
     @Override
     public void onItemClick(Cursor cursor, int position) {
         if (cursor != null && cursor.moveToPosition(position)) {
-            // convert cursor into movie object
-            final int MOVIE_ID_COL = cursor.getColumnIndex(MovieContract.MovieEntry._ID);
-            Uri movieUri = MovieContract.MovieEntry.buildMovieUri(cursor.getInt(MOVIE_ID_COL));
-            ((ItemClickCallback) getActivity()).onItemSelected(movieUri);
+            callItemSelected(cursor);
         }
 
         mPosition = position;
@@ -152,5 +165,12 @@ public class HomeFragment extends Fragment implements MovieListAdapter.MovieOnIt
         getContext().getContentResolver().delete(MovieContract.TrailerEntry.CONTENT_URI_TRAILER, null, null);
         getContext().getContentResolver().delete(MovieContract.ReviewEntry.CONTENT_URI_REVIEW, null, null);
         getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI_MOVIE, null, null);
+    }
+
+    private void callItemSelected(Cursor cursor) {
+        // convert cursor into movie object
+        final int MOVIE_ID_COL = cursor.getColumnIndex(MovieContract.MovieEntry._ID);
+        Uri movieUri = MovieContract.MovieEntry.buildMovieUri(cursor.getInt(MOVIE_ID_COL));
+        ((ItemClickCallback) getActivity()).onItemSelected(movieUri);
     }
 }
